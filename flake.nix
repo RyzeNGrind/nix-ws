@@ -29,7 +29,15 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
   };
 
-  outputs = { self, nixpkgs, nixpkgs-unstable, pre-commit-hooks, nixos-wsl, home-manager, ... } @ inputs: let
+  outputs = {
+    self,
+    nixpkgs,
+    nixpkgs-unstable,
+    pre-commit-hooks,
+    nixos-wsl,
+    home-manager,
+    ...
+  } @ inputs: let
     inherit (self) outputs;
     # Only build for Linux systems
     linuxSystems = ["x86_64-linux" "aarch64-linux"];
@@ -43,9 +51,9 @@
         config.allowUnfree = true;
       };
     };
-    
+
     overlays = {
-   #   default = import ./overlays/default-bash.nix;
+      #   default = import ./overlays/default-bash.nix;
       unstable = overlayUnstable;
     };
   in {
@@ -87,7 +95,7 @@
             entry = "scripts/test-flake.sh";
             language = "system";
             pass_filenames = false;
-            stages = ["commit"];
+            stages = ["commit-msg"];
             always_run = true;
           };
         };
@@ -95,8 +103,8 @@
     });
 
     # Your custom packages and modifications
-    devShells = forAllSystems (system:
-      let
+    devShells = forAllSystems (
+      system: let
         pkgs = import nixpkgs {
           inherit system;
           config = {
@@ -106,8 +114,7 @@
             experimental-features = ["nix-command" "flakes" "repl-flake" "recursive-nix" "fetch-closure" "dynamic-derivations" "daemon-trust-override" "cgroups" "ca-derivations" "auto-allocate-uids" "impure-derivations"];
           };
         };
-      in
-      {
+      in {
         default = pkgs.mkShell {
           name = "nix-config-dev-shell";
           nativeBuildInputs = with pkgs; [
@@ -144,21 +151,22 @@
         basePkgs = import nixpkgs {
           system = "x86_64-linux";
           overlays = [
-          #  overlays.default  # Use local binding instead of self-reference
+            #  overlays.default  # Use local binding instead of self-reference
             overlays.unstable
           ];
           config.allowUnfree = true;
         };
-      in basePkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {
-          inherit inputs;
-          pkgs = basePkgs;
+      in
+        inputs.nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          specialArgs = {
+            inherit inputs;
+            pkgs = basePkgs;
+          };
+          modules = [
+            ./configuration.nix
+          ];
         };
-        modules = [
-          ./configuration.nix
-        ];
-      };
     };
   };
 }

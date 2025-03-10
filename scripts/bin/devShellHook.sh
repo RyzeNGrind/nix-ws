@@ -78,7 +78,7 @@ if ! command -v pre-commit >/dev/null 2>&1; then
   exit 1
 fi
 
-exec pre-commit run --config .pre-commit-config.yaml --hook-type pre-commit
+exec pre-commit run --config .pre-commit-config.yaml "$@"
 EOF
 
 chmod +x .git/hooks/pre-commit

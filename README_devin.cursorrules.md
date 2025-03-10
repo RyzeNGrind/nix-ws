@@ -11,10 +11,11 @@ A Windsurf-powered AI development environment with streamlined development capab
 ## Quick Start
 
 1. Activate the virtual environment:
+
    ```bash
    # On Windows
    venv\Scripts\activate
-   
+
    # On macOS/Linux
    source venv/bin/activate
    ```
@@ -28,6 +29,7 @@ A Windsurf-powered AI development environment with streamlined development capab
 Your project includes several powerful tools in the `tools/` directory:
 
 ### LLM Integration
+
 ```python
 from tools.llm_api import query_llm
 
@@ -40,6 +42,7 @@ print(response)
 ```
 
 ### Web Scraping
+
 ```python
 from tools.web_scraper import scrape_urls
 
@@ -48,6 +51,7 @@ results = scrape_urls(["https://example.com"], max_concurrent=3)
 ```
 
 ### Search Engine
+
 ```python
 from tools.search_engine import search
 
@@ -56,7 +60,9 @@ results = search("your search keywords")
 ```
 
 {% if cookiecutter.project_type == 'cursor' %}
+
 ### Screenshot Verification
+
 ```python
 from tools.screenshot_utils import take_screenshot_sync
 from tools.llm_api import query_llm
@@ -77,21 +83,22 @@ Note: When you first use the screenshot verification feature, Playwright browser
 
 {% if cookiecutter.project_type == 'cursor' %}
 This project uses `.cursorrules` to configure the AI assistant. The assistant can:
+
 - Help with coding tasks
 - Verify screenshots
 - Perform web searches
 - Analyze images and code
-{% elif cookiecutter.project_type == 'github copilot' %}
-This project uses `.github/copilot-instructions.md` to configure the AI assistant. The assistant can:
+  {% elif cookiecutter.project_type == 'github copilot' %}
+  This project uses `.github/copilot-instructions.md` to configure the AI assistant. The assistant can:
 - Help with coding tasks
 - Perform web searches
 - Analyze code
-{% else %}
-This project uses `.windsurfrules` and `scratchpad.md` to configure the AI assistant. The assistant can:
+  {% else %}
+  This project uses `.windsurfrules` and `scratchpad.md` to configure the AI assistant. The assistant can:
 - Help with coding tasks
 - Perform web searches
 - Analyze code
-{% endif %}
+  {% endif %}
 
 ## Environment Variables
 
@@ -102,7 +109,7 @@ Configure these in your `.env` file:
 - `AZURE_OPENAI_ENDPOINT`: Azure OpenAI endpoint (optional)
 - `AZURE_OPENAI_MODEL_DEPLOYMENT`: Azure OpenAI model deployment name (optional)
 - `SILICONFLOW_API_KEY`: Siliconflow API key (optional)
-Note: Basic functionality works without API keys. Advanced features (like multimodal analysis) require appropriate API keys.
+  Note: Basic functionality works without API keys. Advanced features (like multimodal analysis) require appropriate API keys.
 
 ## Development Tools
 
