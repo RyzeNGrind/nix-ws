@@ -127,6 +127,7 @@
             # Git and pre-commit
             git
             pre-commit
+            jq
 
             # Nix tools
             nixpkgs-fmt

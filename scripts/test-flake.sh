@@ -10,7 +10,16 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # Enable required experimental features
-export NIX_CONFIG="experimental-features = nix-command flakes repl-flake"
+export NIX_CONFIG="experimental-features = nix-command flakes"
+
+# Add this near the top of the script:
+#if ! git diff-index --quiet HEAD --; then
+#  echo -e "${YELLOW}Warning: Working tree contains uncommitted changes${NC}"
+#  echo "Consider committing changes before running comprehensive tests"
+#  read -p "Continue anyway? [y/N] " -n 1 -r
+#  [[ $REPLY =~ ^[Yy]$ ]] || exit 1
+#  echo
+#fi
 
 # Function to check sudo access
 check_sudo() {
@@ -159,34 +168,55 @@ run_with_progress "Checking flake outputs" \
         --allow-import-from-derivation
 
 echo -e "\n${BLUE}=== Testing configurations ===${NC}\n"
-run_with_progress "Testing nix-pc configuration" \
-    nix eval --json .#nixosConfigurations.nix-pc.config.system.build.toplevel.drvPath
+# Check for NixOS configurations
+if nix eval --json .#nixosConfigurations >/dev/null 2>&1; then
+  mapfile -t nixos_configs < <(nix eval --json .#nixosConfigurations --apply 'builtins.attrNames' 2>/dev/null | jq -r '.[]? // []')
+  for config in "${nixos_configs[@]}"; do
+    run_with_progress "Testing NixOS config: $config" \
+      nix eval --json .#nixosConfigurations."${config}".config.system.build.toplevel.drvPath
+  done
+else
+  echo -e "${YELLOW}No NixOS configurations found${NC}"
+fi
 
-run_with_progress "Testing nix-ws configuration" \
-    nix eval --json .#nixosConfigurations.nix-ws.config.system.build.toplevel.drvPath
+# Check for Home Manager configurations
+if nix eval --json .#homeConfigurations >/dev/null 2>&1; then
+  mapfile -t home_configs < <(nix eval --json .#homeConfigurations --apply 'builtins.attrNames' 2>/dev/null | jq -r '.[]? // []')
+  for config in "${home_configs[@]}"; do
+    run_with_progress "Testing Home Manager config: $config" \
+      nix eval --json .#homeConfigurations."${config}".activationPackage.drvPath
+  done
+else
+  echo -e "${YELLOW}No Home Manager configurations found${NC}"
+fi
 
-run_with_progress "Testing home-manager configuration" \
-    nix eval --json .#homeConfigurations."ryzengrind@nix-pc".activationPackage.drvPath
 
 # System build test (only if explicitly requested)
 if [ "${RUN_SYSTEM_TEST:-0}" = "1" ]; then
-    echo -e "\n${BLUE}=== Running system build test ===${NC}\n"
-    if ! check_sudo; then
-        echo -e "${RED}Skipping system build test due to sudo configuration issues${NC}"
-    else
-        run_with_progress "Building system configuration" \
-            sudo nixos-rebuild test \
-                --flake .#nix-pc \
-                --show-trace \
-                --keep-going
-    fi
+  echo -e "\n${BLUE}=== Running system build test ===${NC}\n"
+  if ! check_sudo; then
+    echo -e "${RED}Skipping system build test due to sudo configuration issues${NC}"
+  elif [ -n "${nixos_configs[*]}" ]; then
+    for config in "${nixos_configs[@]}"; do
+      run_with_progress "Building system configuration: $config" \
+        sudo nixos-rebuild test --flake ".#${config}" --impure --show-trace --keep-going
+    done
+  else
+    echo -e "${YELLOW}No NixOS configurations to build${NC}"
+  fi
 fi
 
 # Home Manager test (only if explicitly requested)
 if [ "${RUN_HOME_TEST:-0}" = "1" ]; then
-    echo -e "\n${BLUE}=== Running Home Manager test ===${NC}\n"
-    run_with_progress "Building home configuration" \
-        home-manager switch --flake .#ryzengrind@nix-pc
+  echo -e "\n${BLUE}=== Running Home Manager test ===${NC}\n"
+  if [ -n "${home_configs[*]}" ]; then
+    for config in "${home_configs[@]}"; do
+      run_with_progress "Building home configuration: $config" \
+        home-manager switch --flake ".#${config}"
+    done
+  else
+    echo -e "${YELLOW}No Home Manager configurations to build${NC}"
+  fi
 fi
 
 # Quick system verification
