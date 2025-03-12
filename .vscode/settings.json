@@ -1,0 +1,127 @@
+{
+  "fileNestingUpdater.autoUpdate": true,
+  "fileNestingUpdater.autoUpdateInterval": 720,
+  "fileNestingUpdater.promptOnAutoUpdate": true,
+  "fileNestingUpdater.upstreamRepo": "antfu/vscode-file-nesting-config",
+  "fileNestingUpdater.upstreamBranch": "main",
+  "window.commandCenter": 1,
+  "cursor.cpp.disabledLanguages": [],
+  "terminal.external.windowsExec": "${env:SystemRoot}\\System32\\wsl.exe -d NixOS",
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.defaultProfile.windows": "NixOS (WSL)",
+  "terminal.integrated.defaultProfile.linux": "NixOS",
+  "terminal.integrated.enableImages": true,
+  "terminal.integrated.useWslProfiles": false,
+  "terminal.integrated.ignoreProcessNames": [
+    "starship",
+    "oh-my-posh",
+    "bash",
+    "zsh",
+    "fish"
+  ],
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.integrated.env.windows": {
+    "VSCODE_PROFILE": "1",
+    "WSLENV": "VSCODE_WSL_EXT_LOCATION/up:VSCODE_SERVER_TAR/up:VSCODE_IPC_HOOK_CLI/up:PATH/u",
+    "SHELL": "/run/current-system/sw/bin/bash",
+    "NIX_SHELL_ACTIVE": "1",
+    "NIX_PATH": "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos:$HOME/.nix-defexpr/channels",
+    "NIX_PROFILES": "/nix/var/nix/profiles/default /run/current-system/sw $HOME/.nix-profile",
+    "NIX_SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt",
+    "PATH": "/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/run/wrappers/bin:/etc/profiles/per-user/ryzengrind/bin:/nix/var/nix/profiles/per-user/ryzengrind/bin:/usr/bin",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
+  },
+  "terminal.integrated.profiles.windows": {
+    "NixOS (WSL)": {
+      "path": ["${env:windir}\\System32\\wsl.exe"],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/run/current-system/sw/bin/bash",
+        "-l",
+        "-c",
+        "nix develop"
+      ],
+      "icon": "terminal-linux",
+      "overrideName": true
+    },
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "path": "${env:ProgramFiles}\\PowerShell\\7\\pwsh.exe",
+      "args": ["-ExecutionPolicy", "Bypass"]
+    },
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
+    },
+    "Git Bash": {
+      "source": "Git Bash"
+    }
+  },
+  "terminal.integrated.profiles.linux": {
+    "NixOS": {
+      "path": "bash",
+      "icon": "terminal-linux",
+      "args": ["-l", "-c", "nix develop"]
+    }
+  },
+  "terminal.integrated.shellIntegration.enabled": true,
+  "terminal.integrated.automationShell.windows": "${env:windir}\\System32\\wsl.exe",
+  "terminal.integrated.automationProfile.windows": {
+    "path": "${env:windir}\\System32\\wsl.exe",
+    "args": [
+      "-d",
+      "NixOS",
+      "--cd",
+      "${workspaceFolder}",
+      "--exec",
+      "/bin/bash",
+      "-l",
+      "-c",
+      "nix develop"
+    ]
+  },
+  "terminal.integrated.automationProfile.linux": {
+    "path": "bash",
+    "args": ["-l", "-c", "nix develop"]
+  },
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "terminal.integrated.persistentSessionReviveProcess": "never",
+  "terminal.integrated.enablePersistentSessions": false,
+  "git.path": "wsl.exe",
+  "git.useIntegratedAskPass": false,
+  "git.enabled": true,
+  "git.terminalAuthentication": true,
+  "git.useEditorAsCommitInput": false,
+  "git.postCommitCommand": "sync",
+  "git.enableSmartCommit": true,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "editor.tabCompletion": "on",
+  "diffEditor.codeLens": true,
+  "[nix]": {
+    "editor.defaultFormatter": "B4dM4n.nixpkgs-fmt"
+  },
+  "gitlens.ai.experimental.provider": "openai",
+  "gitlens.ai.experimental.openai.model": "gpt-3.5-turbo-1106",
+  "gitlens.ai.model": "xai:grok-beta",
+  "workbench.settings.applyToAllProfiles": [],
+  "cursor.chat.alwaysSearchWeb": true,
+  "cursor.chat.smoothStreaming": true,
+  "cursor.terminal.usePreviewBox": true,
+  "files.autoSave": "afterDelay",
+  "powershell.promptToUpdatePowerShell": false,
+  "remote.WSL.fileWatcher.polling": true,
+  "remote.WSL.debug": true,
+  "python.defaultInterpreterPath": "./venv/bin/python"
+}
+
