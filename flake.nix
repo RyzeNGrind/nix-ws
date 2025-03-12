@@ -165,9 +165,24 @@
             pkgs = basePkgs;
           };
           modules = [
-            ./configuration.nix
+            ./hosts/nix-ws/configuration.nix
           ];
         };
+    };
+
+    homeConfigurations = {
+      ryzengrind = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          config.allowUnfree = true;
+        };
+        extraSpecialArgs = {
+          inherit inputs;
+        };
+        modules = [
+          ./home-manager/ryzengrind/default.nix
+        ];
+      };
     };
   };
 }

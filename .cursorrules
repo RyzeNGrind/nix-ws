@@ -109,3 +109,23 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - When searching for recent news, use the current year (2025) instead of previous years, or simply use the "recent" keyword to get the latest information
 
 # Scratchpad
+
+## Current Task: Fix NixOS and Home Manager Configuration Testing
+
+### Analysis
+1. The flake.nix has NixOS configuration defined for `nix-ws` but no Home Manager configurations
+2. The test script is not finding the configurations because:
+   - NixOS config might not be properly structured
+   - Home Manager configurations are missing entirely
+
+### Plan
+[ ] Fix NixOS configuration evaluation
+   - Ensure proper structure in flake.nix
+   - Verify configuration.nix imports
+[ ] Add Home Manager configuration
+   - Create home-manager configuration directory
+   - Add home-manager configuration to flake.nix outputs
+[ ] Test configurations again
+
+### Progress
+- Identified the root cause: missing Home Manager configurations and potential NixOS config structure issues
