@@ -13,12 +13,6 @@
       git
       gh
       vim
-      code-cursor
-      vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
-      vscode-extensions.ms-vscode-remote.remote-containers
-      vscode-extensions.ms-vscode-remote.remote-wsl
-      vscode-extensions.ms-vscode-remote.remote-ssh
-      vscode-extensions.ms-vscode-remote.remote-ssh-edit
 
       # System tools
       htop
@@ -30,6 +24,12 @@
       zoxide
       direnv
     ];
+
+    sessionVariables = {
+      STARSHIP_SHELL = "bash";
+      SHELL = "${pkgs.bash}/bin/bash";
+    };
+
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
     # introduces backwards incompatible changes.
@@ -43,6 +43,17 @@
   programs = {
     # Let Home Manager install and manage itself.
     home-manager.enable = true;
+
+    bash = {
+      enableCompletion = true;
+      initExtra = ''
+        # Source bash-preexec for better Starship integration
+        source ${pkgs.bash-preexec}/share/bash/bash-preexec.sh
+
+        # Initialize Starship
+        eval "$(${pkgs.starship}/bin/starship init bash)"
+      '';
+    };
 
     # Shell configuration
     fish = {
@@ -81,12 +92,12 @@
       enable = true;
       enableExtensionUpdateCheck = false;
       enableUpdateCheck = false;
-      package = pkgs.code-cursor;
-      extensions = with pkgs; [
-        vscode-extensions.ms-vscode-remote.remote-containers
-        vscode-extensions.ms-vscode-remote.remote-wsl
-        vscode-extensions.ms-vscode-remote.remote-ssh
-        vscode-extensions.ms-vscode-remote.remote-ssh-edit
+      package = pkgs.vscode;
+      extensions = with pkgs.vscode-extensions; [
+        ms-vscode-remote.remote-containers
+        ms-vscode-remote.remote-wsl
+        ms-vscode-remote.remote-ssh
+        ms-vscode-remote.remote-ssh-edit
       ];
     };
   };

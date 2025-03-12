@@ -169,25 +169,39 @@ run_with_progress "Checking flake outputs" \
 
 echo -e "\n${BLUE}=== Testing configurations ===${NC}\n"
 # Check for NixOS configurations
-if nix eval --impure --json .#nixosConfigurations >/dev/null 2>&1; then
-  mapfile -t nixos_configs < <(nix eval --impure --json .#nixosConfigurations --apply 'builtins.attrNames' 2>/dev/null | jq -r '.[]? // []')
+if ! nixos_configs=$(nix eval --impure --json .#nixosConfigurations --apply 'builtins.attrNames' 2>/dev/null); then
+  echo -e "${YELLOW}Failed to evaluate NixOS configurations. Error output:${NC}"
+  nixos_configs=$(nix eval --impure --json --show-trace .#nixosConfigurations --apply 'builtins.attrNames' 2>&1)
+  echo "$nixos_configs"
+  nixos_configs="[]"
+fi
+
+mapfile -t nixos_configs < <(echo "$nixos_configs" | jq -r '.[]? // empty')
+if [ ${#nixos_configs[@]} -eq 0 ]; then
+  echo -e "${YELLOW}No NixOS configurations found${NC}"
+else
   for config in "${nixos_configs[@]}"; do
     run_with_progress "Testing NixOS config: $config" \
-      nix eval --impure --json .#nixosConfigurations."${config}".config.system.build.toplevel.drvPath
+      nix build --impure --show-trace .#nixosConfigurations."${config}".config.system.build.toplevel
   done
-else
-  echo -e "${YELLOW}No NixOS configurations found${NC}"
 fi
 
 # Check for Home Manager configurations
-if nix eval --impure --json .#homeConfigurations >/dev/null 2>&1; then
-  mapfile -t home_configs < <(nix eval --impure --json .#homeConfigurations --apply 'builtins.attrNames' 2>/dev/null | jq -r '.[]? // []')
+if ! home_configs=$(nix eval --impure --json .#homeConfigurations --apply 'builtins.attrNames' 2>/dev/null); then
+  echo -e "${YELLOW}Failed to evaluate Home Manager configurations. Error output:${NC}"
+  home_configs=$(nix eval --impure --json --show-trace .#homeConfigurations --apply 'builtins.attrNames' 2>&1)
+  echo "$home_configs"
+  home_configs="[]"
+fi
+
+mapfile -t home_configs < <(echo "$home_configs" | jq -r '.[]? // empty')
+if [ ${#home_configs[@]} -eq 0 ]; then
+  echo -e "${YELLOW}No Home Manager configurations found${NC}"
+else
   for config in "${home_configs[@]}"; do
     run_with_progress "Testing Home Manager config: $config" \
-      nix eval --impure --json .#homeConfigurations."${config}".activationPackage.drvPath
+      nix build --impure --show-trace .#homeConfigurations."${config}".activationPackage
   done
-else
-  echo -e "${YELLOW}No Home Manager configurations found${NC}"
 fi
 
 # System build test (only if explicitly requested)
@@ -198,7 +212,7 @@ if [ "${RUN_SYSTEM_TEST:-0}" = "1" ]; then
   elif [ -n "${nixos_configs[*]}" ]; then
     for config in "${nixos_configs[@]}"; do
       run_with_progress "Building system configuration: $config" \
-        sudo nixos-rebuild test --flake ".#nixosConfigurations.${config}" --impure --show-trace --keep-going
+        sudo nixos-rebuild test --flake ".#${config}" --impure --show-trace --keep-going
     done
   else
     echo -e "${YELLOW}No NixOS configurations to build${NC}"
