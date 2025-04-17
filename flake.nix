@@ -19,7 +19,13 @@
       ];
 
       perSystem = { config, self', inputs', pkgs, system, ... }: {
-        # System-specific configurations can go here
+        devShells.default = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [ wget alejandra ];
+        };
+
+        devShells.fish = pkgs.mkShell {
+          nativeBuildInputs = with pkgs; [ curl fish ];
+        };
       };
 
       flake = {
