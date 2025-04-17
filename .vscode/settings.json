@@ -1,0 +1,42 @@
+{
+    "git.enabled": true,
+    "git.path": "/run/current-system/sw/bin/git",
+    "git.useEditorAsCommitInput": true,
+    "git.autofetch": true,
+    "git.confirmSync": false,
+    "git.allowNoVerifyCommit": true,
+    "git.ignoreWindowsGit27Warning": true,
+    "git.terminalAuthentication": true,
+    "git.useIntegratedAskPass": false,
+    "git.autorefresh": true,
+    "git.branchProtection": [],
+    "git.branchProtectionPrompt": "alwaysPrompt",
+    "files.eol": "\n",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.env.linux": {
+      "NIX_SHELL_ACTIVE": "1",
+      "PATH": "/run/current-system/sw/bin:${env:PATH}",
+      "SHELL": "/run/current-system/sw/bin/bash"
+    },
+    "terminal.integrated.profiles.linux": {
+      "bash": {
+        "path": "/run/current-system/sw/bin/bash",
+        "icon": "terminal-bash",
+        "args": [
+          "-l"
+        ]
+      }
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[nix]": {
+      "editor.defaultFormatter": "jnoortheen.nix-ide"
+    }
+  }
