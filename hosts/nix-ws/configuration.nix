@@ -15,7 +15,7 @@
   ];
 
   nix.settings = {
-    trusted-users = ["root" "@wheel"];
+    trusted-users = ["root" "@wheel" "ryzengrind"];
     experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
     substituters = [
       "https://nix-community.cachix.org"
@@ -23,7 +23,7 @@
       "https://devdocs-mcp.cachix.org"
     ];
     # Trust these caches to avoid prompts
-    trustedSubstituters = [
+    trusted-substituters = [
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://devdocs-mcp.cachix.org"
