@@ -9,13 +9,13 @@ from pathlib import Path
 async def take_screenshot(url: str, output_path: str = None, width: int = 1280, height: int = 720) -> str:
     """
     Take a screenshot of a webpage using Playwright.
-    
+
     Args:
         url (str): The URL to take a screenshot of
         output_path (str, optional): Path to save the screenshot. If None, saves to a temporary file.
         width (int, optional): Viewport width. Defaults to 1280.
         height (int, optional): Viewport height. Defaults to 720.
-    
+
     Returns:
         str: Path to the saved screenshot
     """
@@ -28,13 +28,13 @@ async def take_screenshot(url: str, output_path: str = None, width: int = 1280, 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         page = await browser.new_page(viewport={'width': width, 'height': height})
-        
+
         try:
             await page.goto(url, wait_until='networkidle')
             await page.screenshot(path=output_path, full_page=True)
         finally:
             await browser.close()
-    
+
     return output_path
 
 def take_screenshot_sync(url: str, output_path: str = None, width: int = 1280, height: int = 720) -> str:
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     parser.add_argument('--output', '-o', help='Output path for screenshot')
     parser.add_argument('--width', '-w', type=int, default=1280, help='Viewport width')
     parser.add_argument('--height', '-H', type=int, default=720, help='Viewport height')
-    
+
     args = parser.parse_args()
     output_path = take_screenshot_sync(args.url, args.output, args.width, args.height)
-    print(f"Screenshot saved to: {output_path}") 
+    print(f"Screenshot saved to: {output_path}")

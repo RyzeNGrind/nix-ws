@@ -19,13 +19,13 @@ def load_environment():
     # 2. .env.local (user-specific overrides)
     # 3. .env (project defaults)
     # 4. .env.example (example configuration)
-    
+
     env_files = ['.env.local', '.env', '.env.example']
     env_loaded = False
-    
+
     print("Current working directory:", Path('.').absolute(), file=sys.stderr)
     print("Looking for environment files:", env_files, file=sys.stderr)
-    
+
     for env_file in env_files:
         env_path = Path('.') / env_file
         print(f"Checking {env_path.absolute()}", file=sys.stderr)
@@ -38,7 +38,7 @@ def load_environment():
             with open(env_path) as f:
                 keys = [line.split('=')[0].strip() for line in f if '=' in line and not line.startswith('#')]
                 print(f"Keys loaded from {env_file}: {keys}", file=sys.stderr)
-    
+
     if not env_loaded:
         print("Warning: No .env files found. Using system environment variables only.", file=sys.stderr)
         print("Available system environment variables:", list(os.environ.keys()), file=sys.stderr)
@@ -49,20 +49,20 @@ load_environment()
 def encode_image_file(image_path: str) -> tuple[str, str]:
     """
     Encode an image file to base64 and determine its MIME type.
-    
+
     Args:
         image_path (str): Path to the image file
-        
+
     Returns:
         tuple: (base64_encoded_string, mime_type)
     """
     mime_type, _ = mimetypes.guess_type(image_path)
     if not mime_type:
         mime_type = 'image/png'  # Default to PNG if type cannot be determined
-        
+
     with open(image_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-        
+
     return encoded_string, mime_type
 
 def create_llm_client(provider="openai"):
@@ -132,20 +132,20 @@ def create_llm_client(provider="openai"):
 def query_llm(prompt: str, client=None, model=None, provider="openai", image_path: Optional[str] = None) -> Optional[str]:
     """
     Query an LLM with a prompt and optional image attachment.
-    
+
     Args:
         prompt (str): The text prompt to send
         client: The LLM client instance
         model (str, optional): The model to use
         provider (str): The API provider to use
         image_path (str, optional): Path to an image file to attach
-        
+
     Returns:
         Optional[str]: The LLM's response or None if there was an error
     """
     if client is None:
         client = create_llm_client(provider)
-    
+
     try:
         # Set default model
         if model is None:
@@ -167,16 +167,16 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
                 model = os.getenv('OLLAMA_MODEL', 'mistral')
             elif provider == "lm-studio":
                 model = "local-model"  # LM Studio handles model selection in its UI
-        
+
         if provider in ["openai", "local", "deepseek", "azure", "siliconflow", "lm-studio"]:
             messages = [{"role": "user", "content": []}]
-            
+
             # Add text content
             messages[0]["content"].append({
                 "type": "text",
                 "text": prompt
             })
-            
+
             # Add image content if provided
             if image_path:
                 if provider == "openai":
@@ -185,31 +185,31 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
                         {"type": "text", "text": prompt},
                         {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{encoded_image}"}}
                     ]
-            
+
             kwargs = {
                 "model": model,
                 "messages": messages,
                 "temperature": 0.7,
             }
-            
+
             # Add o1-specific parameters
             if model == "o1":
                 kwargs["response_format"] = {"type": "text"}
                 kwargs["reasoning_effort"] = "low"
                 del kwargs["temperature"]
-            
+
             response = client.chat.completions.create(**kwargs)
             return response.choices[0].message.content
-            
+
         elif provider == "anthropic":
             messages = [{"role": "user", "content": []}]
-            
+
             # Add text content
             messages[0]["content"].append({
                 "type": "text",
                 "text": prompt
             })
-            
+
             # Add image content if provided
             if image_path:
                 encoded_image, mime_type = encode_image_file(image_path)
@@ -221,14 +221,14 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
                         "data": encoded_image
                     }
                 })
-            
+
             response = client.messages.create(
                 model=model,
                 max_tokens=1000,
                 messages=messages
             )
             return response.content[0].text
-            
+
         elif provider == "gemini":
             model = client.GenerativeModel(model)
             if image_path:
@@ -248,7 +248,7 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
                 )
             response = chat_session.send_message(prompt)
             return response.text
-            
+
         elif provider == "ollama":
             response = client.chat(model=model, messages=[
                 {
@@ -257,7 +257,7 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
                 }
             ])
             return response['message']['content']
-            
+
     except Exception as e:
         print(f"Error querying LLM: {e}", file=sys.stderr)
         return None
@@ -265,7 +265,7 @@ def query_llm(prompt: str, client=None, model=None, provider="openai", image_pat
 def main():
     parser = argparse.ArgumentParser(description='Query an LLM with a prompt')
     parser.add_argument('--prompt', type=str, help='The prompt to send to the LLM', required=True)
-    parser.add_argument('--provider', 
+    parser.add_argument('--provider',
                        choices=['openai', 'anthropic', 'gemini', 'local', 'deepseek', 'azure', 'siliconflow', 'ollama', 'lm-studio'],
                        default='openai',
                        help='The API provider to use')
@@ -275,7 +275,7 @@ def main():
 
     if not args.model:
         if args.provider == 'openai':
-            args.model = "gpt-4o" 
+            args.model = "gpt-4o"
         elif args.provider == "deepseek":
             args.model = "deepseek-chat"
         elif args.provider == "siliconflow":

@@ -17,6 +17,16 @@
   nix.settings = {
     trusted-users = ["root" "@wheel"];
     experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
+    substituters = [
+      "https://nix-community.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+      "https://devdocs-mcp.cachix.org"
+    ];
+    trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+      "devdocs-mcp.cachix.org-1:BDuKzDWQxySNasd+srtl1+TT3QRBSPtAzoQiAnX1b6w="
+    ];
   };
   nixpkgs.config = {
     allowUnfree = true;
@@ -87,12 +97,22 @@
       python3
       nodejs
       zlib
+      cachix
+      attic-server
+      attic-client
     ];
   };
   security.sudo = {
     enable = true;
     execWheelOnly = true; # Optional security measure
     wheelNeedsPassword = false;
+  };
+
+  services.openssh = {
+    enable = true;
+    permitRootLogin = "yes";
+    passwordAuthentication = true;
+    ports = [2222];
   };
 
   users.users.ryzengrind = {
@@ -104,9 +124,12 @@
   wsl = {
     enable = true;
     defaultUser = "ryzengrind";
-    wslConf.network.hostname = "nix-ws";
+    wslConf = {
+      network.hostname = "nix-ws";
+      wsl2.vmIdleTimeout = -1;
+    };
     startMenuLaunchers = true;
-    docker-desktop.enable = false;
+    docker-desktop.enable = true;
   };
   #  systemd.services.wsl-vpnkit = {
   #    enable = true;

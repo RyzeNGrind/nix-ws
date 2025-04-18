@@ -57,7 +57,7 @@ spinner() {
     local delay=0.1
     local spinstr='|/-\'
     local start=$SECONDS
-    
+
     while ps -p $pid > /dev/null; do
         local elapsed=$((SECONDS - start))
         local mins=$((elapsed / 60))
@@ -76,19 +76,19 @@ run_with_progress() {
     shift
     local log_file="/tmp/cmd.$$.log"
     local output_file="/tmp/cmd.$$.output"
-    
+
     # Create named pipe for real-time output
     mkfifo "$output_file"
-    
+
     # Start command and redirect output
     echo -e "\n${BLUE}=== ${message} ===${NC}"
     ("$@" 2>&1 | tee "$log_file" > "$output_file") &
     local pid=$!
-    
+
     # Start spinner in background
     spinner $pid "$message" &
     local spinner_pid=$!
-    
+
     # Read and display output in real-time with timeout
     local timeout=1800  # 30 minutes timeout
     local start=$SECONDS
@@ -102,16 +102,16 @@ run_with_progress() {
             return 124
         fi
     done < "$output_file"
-    
+
     # Wait for command to finish
     wait $pid
     local exit_code=$?
-    
+
     # Kill spinner and clean up
     kill $spinner_pid 2>/dev/null || true
     wait $spinner_pid 2>/dev/null || true
     rm -f "$output_file"
-    
+
     if [ $exit_code -eq 0 ]; then
         echo -e "${BLUE}${message}${NC} ${GREEN}✓${NC}"
     else
@@ -121,7 +121,7 @@ run_with_progress() {
             cat "$log_file"
         fi
     fi
-    
+
     rm -f "$log_file"
     return $exit_code
 }
@@ -145,7 +145,7 @@ echo -e "\n${BLUE}=== Starting comprehensive flake testing ===${NC}\n"
 # Skip pre-commit hooks if we're already running them
 if [ -z "${RUNNING_TEST_FLAKE:-}" ]; then
     echo -e "${BLUE}=== Running pre-commit hooks ===${NC}\n"
-    
+
     run_with_progress "Running alejandra formatting" \
         run_precommit_hook alejandra --all-files
 
@@ -255,4 +255,4 @@ if [ "${RUN_SYSTEM_TEST:-0}" != "1" ] || [ "${RUN_HOME_TEST:-0}" != "1" ]; then
 fi
 
 # Cleanup any leftover temporary files
-rm -f /tmp/cmd.$$.* 2>/dev/null || true 
+rm -f /tmp/cmd.$$.* 2>/dev/null || true

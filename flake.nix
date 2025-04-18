@@ -1,6 +1,17 @@
 {
   description = "NixOS configurations for baremetal and WSL development/server/cluster environments";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+      "https://cuda-maintainers.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
+    ];
+  };
+
   inputs = {
     # Nixpkgs
     nixpkgs.url = "github:nixos/nixpkgs/nixos-24.11";
@@ -76,6 +87,8 @@
           statix = {
             enable = true;
             excludes = ["^modules/nixos/cursor/.*$"];
+            entry = "statix check";
+            pass_filenames = false;
           };
           prettier = {
             enable = true;
@@ -166,6 +179,11 @@
           };
           modules = [
             ./hosts/nix-ws/configuration.nix
+            {
+              # given the users in this list the right to specify additional substituters via:
+              #    1. `nixConfig.substituters` in `flake.nix`
+              nix.settings.trusted-users = ["ryzengrind"];
+            }
           ];
         };
     };

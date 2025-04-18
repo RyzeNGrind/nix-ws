@@ -109,7 +109,7 @@
   "editor.tabCompletion": "on",
   "diffEditor.codeLens": true,
   "[nix]": {
-    "editor.defaultFormatter": "B4dM4n.nixpkgs-fmt"
+    "editor.defaultFormatter": "jnoortheen.nix-ide"
   },
   "gitlens.ai.experimental.provider": "openai",
   "gitlens.ai.experimental.openai.model": "gpt-3.5-turbo-1106",
@@ -124,4 +124,3 @@
   "remote.WSL.debug": true,
   "python.defaultInterpreterPath": "./venv/bin/python"
 }
-
