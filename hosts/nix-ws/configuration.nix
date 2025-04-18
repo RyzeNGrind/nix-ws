@@ -18,14 +18,13 @@
     trusted-users = ["root" "@wheel" "ryzengrind"];
     experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
 
-    # Explicitly allow all substituters without prompting
+    # Explicitly allow all substituters and their keys without prompting
     substituters = [
       "https://cache.nixos.org"
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
-      "https://devdocs-mcp.cachix.org"
-      "http://localhost:9001" # Trustix local cache
-      "https://your-attic-cache.example.com" # Replace with your actual Attic URL
+      #"http://localhost:9001" # Trustix local cache
+      #"https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
 
     # Trust all substituters automatically without prompting
@@ -36,8 +35,8 @@
       "https://ryzengrind.cachix.org"
       "https://ryzengrind-nix-config.cachix.org"
       "https://daimyo.cachix.org"
-      "http://localhost:9001" # Trustix local cache
-      "https://your-attic-cache.example.com" # Replace with your actual Attic URL
+      #"http://localhost:9001" # Trustix local cache
+      #"https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
 
     trusted-public-keys = [
@@ -47,13 +46,15 @@
       "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g="
       "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk="
       "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8="
-      "binarycache.example.com://TRUSTIX_PUBLIC_KEY_HERE" # Replace with your Trustix public key
-      "your-attic-cache:ATTIC_PUBLIC_KEY_HERE" # Replace with your Attic public key
+      #"binarycache.example.com://TRUSTIX_PUBLIC_KEY_HERE" # Replace with your Trustix public key
+      #"your-attic-cache:ATTIC_PUBLIC_KEY_HERE" # Replace with your Attic public key
     ];
 
-    # These two settings prevent the prompts
+    # Prevent substituter prompts
     require-sigs = true;
     accept-flake-config = true;
+    allow-dirty = true; # Prevent dirty Git tree warnings
+    warn-dirty = false;
   };
   nixpkgs.config = {
     allowUnfree = true;
@@ -127,6 +128,9 @@
       cachix
       attic-server
       attic-client
+      _1password-cli
+      _1password-gui-beta
+      trustix
     ];
   };
   security.sudo = {
@@ -140,6 +144,14 @@
     permitRootLogin = "yes";
     passwordAuthentication = true;
     ports = [2222];
+  };
+
+  services.onepassword-secrets = {
+    enable = true;
+    users = ["RyzenGrind"]; # Users that need secret access
+    tokenFile = "/etc/opnix-token"; # Default location
+    configFile = "/home/RyzenGrind/.config/opnix/secrets.json";
+    outputDir = "/home/RyzenGrind/.config/opnix/secrets"; # Optional, this is the default
   };
 
   users.users.ryzengrind = {

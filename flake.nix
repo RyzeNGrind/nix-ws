@@ -35,6 +35,10 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    opnix = {
+      url = "github:brizzbuzz/opnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # NixOS-WSL
     nixos-wsl.url = "github:nix-community/nixos-wsl";
@@ -53,6 +57,7 @@
     pre-commit-hooks,
     nixos-wsl,
     home-manager,
+    opnix,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -159,6 +164,12 @@
             fzf
             zoxide
             direnv
+            cachix
+            attic-server
+            attic-client
+            _1password-cli
+            _1password-gui-beta
+            trustix
           ];
           shellHook = builtins.readFile ./scripts/bin/devShellHook.sh;
         };
@@ -183,6 +194,7 @@
             pkgs = basePkgs;
           };
           modules = [
+            opnix.nixosModules.default
             ./hosts/nix-ws/configuration.nix
             {
               # given the users in this list the right to specify additional substituters via:
@@ -203,6 +215,7 @@
           inherit inputs;
         };
         modules = [
+          opnix.homeManagerModules.opnix
           ./home-manager/ryzengrind/default.nix
         ];
       };
