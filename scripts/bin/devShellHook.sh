@@ -22,7 +22,6 @@ echo -e "  • git          - Version control"
 echo -e "  • pre-commit   - Run pre-commit hooks"
 
 echo -e "\n${BLUE}Nix Tools:${NC}"
-echo -e "  • nixpkgs-fmt  - Alternative Nix formatter"
 echo -e "  • nil          - Nix language server"
 echo -e "  • nom          - Nix output monitor"
 echo -e "  • home-manager - User environment manager"

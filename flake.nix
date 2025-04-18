@@ -148,7 +148,6 @@
             jq
 
             # Nix tools
-            nixpkgs-fmt
             nil
             nix-output-monitor
             home-manager.packages.${system}.default
