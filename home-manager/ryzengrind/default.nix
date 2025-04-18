@@ -1,6 +1,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }: {
   # Home Manager needs a bit of information about you and the paths it should manage.
@@ -23,6 +24,12 @@
       fzf
       zoxide
       direnv
+
+      #secrets
+      _1password
+      _1password-gui
+      _1password-gui-beta
+      nix-ld
     ];
 
     sessionVariables = {
@@ -88,6 +95,15 @@
       userEmail = "ryzengrind@example.com"; # Replace with your email
     };
 
+    _1password = {
+      enable = true;
+    };
+
+    _1password-gui = {
+      enable = true;
+      polkitPolicyOwners = ["ryzengrind"];
+    };
+
     vscode = {
       enable = true;
       enableExtensionUpdateCheck = false;
@@ -101,4 +117,10 @@
       ];
     };
   };
+
+  nixpkgs.config.allowUnfreePredicate = pkg:
+    builtins.elem (lib.getName pkg) [
+      "1password-gui"
+      "1password"
+    ];
 }

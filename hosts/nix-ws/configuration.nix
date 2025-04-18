@@ -23,7 +23,10 @@
       "https://cache.nixos.org"
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
-      #"http://localhost:9001" # Trustix local cache
+      "https://ryzengrind.cachix.org"
+      "https://ryzengrind-nix-config.cachix.org"
+      "https://daimyo.cachix.org"
+      "http://localhost:9001" # Trustix local cache
       #"https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
 
@@ -35,7 +38,7 @@
       "https://ryzengrind.cachix.org"
       "https://ryzengrind-nix-config.cachix.org"
       "https://daimyo.cachix.org"
-      #"http://localhost:9001" # Trustix local cache
+      "http://localhost:9001" # Trustix local cache
       #"https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
 
@@ -46,6 +49,7 @@
       "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g="
       "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk="
       "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8="
+      "localhost:VXOPwgEJPB/fAiY+EopQY7gvVfQZyF1+ifn2NhYYJgA=" # Example Trustix key - replace with your actual key
       #"binarycache.example.com://TRUSTIX_PUBLIC_KEY_HERE" # Replace with your Trustix public key
       #"your-attic-cache:ATTIC_PUBLIC_KEY_HERE" # Replace with your Attic public key
     ];
@@ -141,53 +145,67 @@
   services = {
     openssh = {
       enable = true;
-      permitRootLogin = "yes";
-      passwordAuthentication = true;
+      settings = {
+        PermitRootLogin = "yes";
+        PasswordAuthentication = true;
+      };
       ports = [2222];
     };
 
     onepassword-secrets = {
-      enable = true;
-      users = ["RyzenGrind"]; # Users that need secret access
-      tokenFile = "/etc/opnix-token"; # Default location
-      configFile = "/home/RyzenGrind/.config/opnix/secrets.json";
-      outputDir = "/home/RyzenGrind/.config/opnix/secrets"; # Optional, this is the default
+      enable = false; # Temporarily disable until token file is present
+      users = ["ryzengrind"];
+      tokenFile = "/etc/opnix-token";
+      configFile = "/home/ryzengrind/.config/opnix/secrets.json";
+      outputDir = "/home/ryzengrind/.config/opnix/secrets";
     };
 
-    trustix = {
-      enable = true;
-
-      # Configure subscribers to existing Trustix logs
-      subscribers = [
-        {
-          protocol = "nix";
-          publicKey = {
-            type = "ed25519";
-            key = "YOUR_TRUSTIX_PUBLIC_KEY"; # Replace with actual public key
-          };
-        }
-      ];
-
-      # Remote Trustix servers
-      remotes = [
-        "https://demo.trustix.dev" # Example - replace with actual Trustix server
-      ];
-
-      # Decision logic for determining if a build is trustworthy
-      deciders.nix = [
-        {
-          engine = "percentage";
-          percentage.minimum = 66; # At least 2/3 majority to be substituted
-        }
-      ];
+    # Configure Trustix local binary cache
+    trustix-nix-cache = {
+      enable = false; # Temporarily disable until issues are resolved
+      private-key = "/var/trustix/keys/cache-priv-key.pem";
+      port = 9001;
     };
+  };
+
+  # Configure Trustix daemon for validating binary caches
+  services.trustix = {
+    enable = false; # Temporarily disable until specific issues can be addressed
+
+    # Define how we verify the trustworthiness of packages
+    deciders.nix = {
+      engine = "percentage";
+      percentage = {
+        minimum = 66; # Require 2/3 majority
+      };
+    };
+
+    # For subscribing to external Trustix logs
+    subscribers = [
+      {
+        protocol = "nix";
+        publicKey = {
+          type = "ed25519";
+          key = "2uy8gNIOYEewTiV7iB7cUxBGpXxQtdlFepFoRvJTCJo="; # Example key - replace with actual
+        };
+      }
+    ];
+
+    # Remote Trustix servers
+    remotes = [
+      "https://demo.trustix.dev" # Example - replace with actual servers
+    ];
   };
 
   users.users.ryzengrind = {
     isNormalUser = true;
     shell = pkgs.fish;
+    group = "ryzengrind";
     extraGroups = ["audio" "docker" "kvm" "libvirt" "libvirtd" "networkmanager" "podman" "qemu-libvirtd" "users" "video" "wheel"];
   };
+
+  # Create the ryzengrind group
+  users.groups.ryzengrind = {};
 
   wsl = {
     enable = true;

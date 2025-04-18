@@ -48,6 +48,12 @@
     };
     # Hardware configuration
     nixos-hardware.url = "github:nixos/nixos-hardware";
+
+    # Trustix for binary cache verification
+    trustix = {
+      url = "github:nix-community/trustix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -58,6 +64,7 @@
     nixos-wsl,
     home-manager,
     opnix,
+    trustix,
     ...
   } @ inputs: let
     inherit (self) outputs;
@@ -74,9 +81,16 @@
       };
     };
 
+    overlayTrustix = final: prev: let
+      inherit (inputs.trustix.packages.${prev.system}) trustix trustix-nix;
+    in {
+      inherit trustix trustix-nix;
+    };
+
     overlays = {
       #   default = import ./overlays/default-bash.nix;
       unstable = overlayUnstable;
+      trustix = overlayTrustix;
     };
   in {
     inherit overlays;
@@ -182,6 +196,7 @@
           overlays = [
             #  overlays.default  # Use local binding instead of self-reference
             overlays.unstable
+            overlays.trustix
           ];
           config.allowUnfree = true;
         };
@@ -193,6 +208,8 @@
             pkgs = basePkgs;
           };
           modules = [
+            # Import Trustix module
+            trustix.nixosModules.trustix
             opnix.nixosModules.default
             ./hosts/nix-ws/configuration.nix
             {
