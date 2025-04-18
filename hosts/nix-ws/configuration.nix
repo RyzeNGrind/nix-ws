@@ -130,7 +130,6 @@
       attic-client
       _1password-cli
       _1password-gui-beta
-      trustix
     ];
   };
   security.sudo = {
@@ -139,19 +138,49 @@
     wheelNeedsPassword = false;
   };
 
-  services.openssh = {
-    enable = true;
-    permitRootLogin = "yes";
-    passwordAuthentication = true;
-    ports = [2222];
-  };
+  services = {
+    openssh = {
+      enable = true;
+      permitRootLogin = "yes";
+      passwordAuthentication = true;
+      ports = [2222];
+    };
 
-  services.onepassword-secrets = {
-    enable = true;
-    users = ["RyzenGrind"]; # Users that need secret access
-    tokenFile = "/etc/opnix-token"; # Default location
-    configFile = "/home/RyzenGrind/.config/opnix/secrets.json";
-    outputDir = "/home/RyzenGrind/.config/opnix/secrets"; # Optional, this is the default
+    onepassword-secrets = {
+      enable = true;
+      users = ["RyzenGrind"]; # Users that need secret access
+      tokenFile = "/etc/opnix-token"; # Default location
+      configFile = "/home/RyzenGrind/.config/opnix/secrets.json";
+      outputDir = "/home/RyzenGrind/.config/opnix/secrets"; # Optional, this is the default
+    };
+
+    trustix = {
+      enable = true;
+
+      # Configure subscribers to existing Trustix logs
+      subscribers = [
+        {
+          protocol = "nix";
+          publicKey = {
+            type = "ed25519";
+            key = "YOUR_TRUSTIX_PUBLIC_KEY"; # Replace with actual public key
+          };
+        }
+      ];
+
+      # Remote Trustix servers
+      remotes = [
+        "https://demo.trustix.dev" # Example - replace with actual Trustix server
+      ];
+
+      # Decision logic for determining if a build is trustworthy
+      deciders.nix = [
+        {
+          engine = "percentage";
+          percentage.minimum = 66; # At least 2/3 majority to be substituted
+        }
+      ];
+    };
   };
 
   users.users.ryzengrind = {
@@ -188,33 +217,4 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
-
-  # Add Trustix service configuration if you want to run it locally
-  services.trustix = {
-    enable = true;
-
-    # Configure subscribers to existing Trustix logs
-    subscribers = [
-      {
-        protocol = "nix";
-        publicKey = {
-          type = "ed25519";
-          key = "YOUR_TRUSTIX_PUBLIC_KEY"; # Replace with actual public key
-        };
-      }
-    ];
-
-    # Remote Trustix servers
-    remotes = [
-      "https://demo.trustix.dev" # Example - replace with actual Trustix server
-    ];
-
-    # Decision logic for determining if a build is trustworthy
-    deciders.nix = [
-      {
-        engine = "percentage";
-        percentage.minimum = 66; # At least 2/3 majority to be substituted
-      }
-    ];
-  };
 }

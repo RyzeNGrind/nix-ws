@@ -169,7 +169,6 @@
             attic-client
             _1password-cli
             _1password-gui-beta
-            trustix
           ];
           shellHook = builtins.readFile ./scripts/bin/devShellHook.sh;
         };
