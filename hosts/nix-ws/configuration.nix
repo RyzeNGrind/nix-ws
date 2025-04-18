@@ -17,22 +17,43 @@
   nix.settings = {
     trusted-users = ["root" "@wheel" "ryzengrind"];
     experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
+
+    # Explicitly allow all substituters without prompting
     substituters = [
+      "https://cache.nixos.org"
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
       "https://devdocs-mcp.cachix.org"
+      "http://localhost:9001" # Trustix local cache
+      "https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
-    # Trust these caches to avoid prompts
+
+    # Trust all substituters automatically without prompting
     trusted-substituters = [
+      "https://cache.nixos.org"
       "https://nix-community.cachix.org"
       "https://cuda-maintainers.cachix.org"
-      "https://devdocs-mcp.cachix.org"
+      "https://ryzengrind.cachix.org"
+      "https://ryzengrind-nix-config.cachix.org"
+      "https://daimyo.cachix.org"
+      "http://localhost:9001" # Trustix local cache
+      "https://your-attic-cache.example.com" # Replace with your actual Attic URL
     ];
+
     trusted-public-keys = [
+      "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-      "devdocs-mcp.cachix.org-1:BDuKzDWQxySNasd+srtl1+TT3QRBSPtAzoQiAnX1b6w="
+      "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g="
+      "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk="
+      "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8="
+      "binarycache.example.com://TRUSTIX_PUBLIC_KEY_HERE" # Replace with your Trustix public key
+      "your-attic-cache:ATTIC_PUBLIC_KEY_HERE" # Replace with your Attic public key
     ];
+
+    # These two settings prevent the prompts
+    require-sigs = true;
+    accept-flake-config = true;
   };
   nixpkgs.config = {
     allowUnfree = true;
@@ -155,4 +176,33 @@
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.11"; # Did you read the comment?
+
+  # Add Trustix service configuration if you want to run it locally
+  services.trustix = {
+    enable = true;
+
+    # Configure subscribers to existing Trustix logs
+    subscribers = [
+      {
+        protocol = "nix";
+        publicKey = {
+          type = "ed25519";
+          key = "YOUR_TRUSTIX_PUBLIC_KEY"; # Replace with actual public key
+        };
+      }
+    ];
+
+    # Remote Trustix servers
+    remotes = [
+      "https://demo.trustix.dev" # Example - replace with actual Trustix server
+    ];
+
+    # Decision logic for determining if a build is trustworthy
+    deciders.nix = [
+      {
+        engine = "percentage";
+        percentage.minimum = 66; # At least 2/3 majority to be substituted
+      }
+    ];
+  };
 }
