@@ -5,7 +5,6 @@
 # https://github.com/nix-community/NixOS-WSL
 {
   config,
-  lib,
   pkgs,
   inputs,
   ...
