@@ -109,6 +109,8 @@
             statix
             nodePackages.prettier
             git
+            gh
+            fish
             pre-commit # Use the pre-commit package directly
             jq
             nil
