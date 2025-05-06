@@ -98,6 +98,7 @@
               statix.enable = true;
               prettier.enable = true;
             };
+	    excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
           };
         };
 
