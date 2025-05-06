@@ -2,3 +2,4 @@ venv/
 result
 .pre-commit-config.yaml
 secrets/*
+.statix.toml
