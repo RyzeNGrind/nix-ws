@@ -83,7 +83,7 @@
         };
 
         packages = {
-          pre-commit-run = config.pre-commit.run;
+          pre-commit-run = config.checks.pre-commit;
           statix-config = pkgs.writeTextFile {
             name = "statix.toml";
             text = ''
