@@ -1,0 +1,2 @@
+[[exclude]]
+path = "hosts/nix-ws/hardware-configuration.nix"

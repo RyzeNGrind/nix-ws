@@ -4,49 +4,69 @@
 # NixOS-WSL specific options are documented on the NixOS-WSL repository:
 # https://github.com/nix-community/NixOS-WSL
 # hosts/nix-ws/configuration.nix
-# hosts/nix-ws/configuration.nix
 {
-  config, # Final config object (available for use in mkIf conditions etc.)
+  config,
   pkgs,
   lib,
   inputs,
+  self,
   ...
-}: {
-  # Use lib.mkMerge to combine the main config block and the conditional one
+}: let
+  # Get the specialisation to use in conditional logic
+  specialisation = lib.getAttr "specialisation" config;
+
+  # Define the conditional variable specific to this module's contribution
+  displayVariable = {
+    DISPLAY =
+      if specialisation == "wsl"
+      then "localhost:0"
+      else "default";
+  };
+
+  # Define the etc files you want to manage
+  etcFiles = {
+    # Use ${self} to refer to files relative to the flake root
+    "nixos/flake.nix".source = "${self}/flake.nix";
+    "nixos/flake.lock".source = "${self}/flake.lock";
+    # These are relative to *this* file, so ./ is okay here
+    "nixos/configuration.nix".source = ./configuration.nix;
+    "nixos/hardware-configuration.nix".source = ./hardware-configuration.nix;
+  };
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
+in {
   config = lib.mkMerge [
     # --- Block 1: Main Configuration (including specialisations) ---
     {
+      # --- Add safe defaults for essential boot options ---
+      fileSystems."/" = lib.mkDefault {
+        # Keep the default root separate for simplicity here, statix doesn't complain about this top-level one
+        device = "/dev/disk/by-label/NIXOS_PLEASE_DEFINE";
+        fsType = "ext4";
+      };
+
+      # --- Grouped boot defaults ---
+      boot = {
+        loader = {
+          systemd-boot.enable = lib.mkDefault false; # Default to disabled
+          grub = {
+            enable = lib.mkDefault false; # Explicitly disable GRUB by default
+            device = lib.mkDefault null; # Satisfies the check when grub is disabled
+          };
+        };
+        # Add other common boot settings here if needed
+      };
+
+      # --- Existing Common Config ---
       nix.settings = {
         trusted-users = ["root" "@wheel" "ryzengrind"];
+        # ... other nix settings ... (keep as before)
         experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
-        # ... other nix settings ...
-        substituters = [
-          "https://cache.nixos.org"
-          "https://nix-community.cachix.org"
-          "https://cuda-maintainers.cachix.org"
-          "https://ryzengrind.cachix.org"
-          "https://ryzengrind-nix-config.cachix.org"
-          "https://daimyo.cachix.org"
-          "http://localhost:9001" # Trustix local cache
-        ];
-        trusted-substituters = [
-          "https://cache.nixos.org"
-          "https://nix-community.cachix.org"
-          "https://cuda-maintainers.cachix.org"
-          "https://ryzengrind.cachix.org"
-          "https://ryzengrind-nix-config.cachix.org"
-          "https://daimyo.cachix.org"
-          "http://localhost:9001" # Trustix local cache
-        ];
-        trusted-public-keys = [
-          "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-          "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-          "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E="
-          "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g="
-          "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk="
-          "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8="
-          "localhost:VXOPwgEJPB/fAiY+EopQY7gvVfQZyF1+ifn2NhYYJgA=" # Example Trustix key
-        ];
+        substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org" "http://localhost:9001"];
+        trusted-substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org" "http://localhost:9001"];
+        trusted-public-keys = ["cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=" "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g=" "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk=" "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8=" "localhost:VXOPwgEJPB/fAiY+EopQY7gvVfQZyF1+ifn2NhYYJgA="];
         require-sigs = true;
         accept-flake-config = true;
         allow-dirty = true;
@@ -58,22 +78,16 @@
         allowBroken = true;
       };
 
+      # ... programs, environment, security, services, users ... (keep as before)
       programs = {
         fish = {
           enable = true;
-          interactiveShellInit = ''
-            ${pkgs.starship}/bin/starship init fish | source
-          '';
+          interactiveShellInit = ''${pkgs.starship}/bin/starship init fish | source'';
         };
-        nix-ld = {
-          enable = true;
-          # libraries = ...;
-        };
+        nix-ld = {enable = true;};
         bash = {
           completion.enable = true;
-          interactiveShellInit = ''
-            eval "$(${pkgs.starship}/bin/starship init bash)"
-          '';
+          interactiveShellInit = ''eval "$(${pkgs.starship}/bin/starship init bash)"'';
         };
         starship = {
           enable = true;
@@ -88,40 +102,26 @@
           };
         };
       };
-
       environment = {
+        etc = etcFiles;
+        variables = displayVariable;
         shellAliases = {};
         pathsToLink = ["/share/bash-completion"];
-        systemPackages = with pkgs; [
-          readline
-          bashInteractive
-          bash-completion
-          ncurses
-          wget
-          jq
-          git
-          starship
-          nix-ld
-          binutils
-          glibc
-          gcc
-          python3
-          nodejs
-          zlib
-          cachix
-          attic-server
-          attic-client
-          _1password-cli
-          _1password-gui-beta
-        ];
+        systemPackages = with pkgs; [readline bashInteractive bash-completion ncurses wget jq git starship nix-ld binutils glibc gcc python3 nodejs zlib cachix attic-server attic-client _1password-cli _1password-gui-beta];
       };
-
+      # System state version
+      system = {
+        stateVersion = "24.11";
+        configurationRevision =
+          if self ? rev && self.rev != null
+          then self.rev
+          else (lib.trace "Repository must be clean and committed" null);
+      };
       security.sudo = {
         enable = true;
         execWheelOnly = true;
         wheelNeedsPassword = false;
       };
-
       services = {
         openssh = {
           enable = true;
@@ -161,7 +161,6 @@
           remotes = ["https://demo.trustix.dev"];
         };
       };
-
       users.users.ryzengrind = {
         isNormalUser = true;
         shell = pkgs.fish;
@@ -186,33 +185,72 @@
               docker-desktop.enable = true;
             };
             environment.systemPackages = with pkgs; [wsl-vpnkit];
+
+            # --- Grouped WSL Boot settings ---
+            boot = {
+              loader = {
+                # Force disable both bootloaders, overriding any defaults
+                systemd-boot.enable = lib.mkForce false;
+                grub.enable = lib.mkForce false;
+              };
+              # Let WSL manage init
+              initrd.systemd.enable = lib.mkForce false;
+            };
+
             services.logind.enable = lib.mkForce false;
             systemd.targets.graphical.enable = lib.mkForce false;
             services.udev.enable = lib.mkForce false;
             hardware.opengl.enable = lib.mkForce false;
           };
         };
-        # Renamed back to 'baremetal' for clarity, was 'bm'
+
         baremetal = {
           configuration = {
-            boot.loader.systemd-boot.enable = lib.mkDefault true;
+            # --- Grouped Bare-metal Filesystems ---
+            fileSystems = {
+              "/" = {
+                device = "/dev/disk/by-uuid/50b364ac-a2e9-4c8c-bc97-c7288f997323";
+                fsType = "ext4";
+              };
+              "/boot" = {
+                device = "/dev/disk/by-uuid/74A6-C0C0";
+                fsType = "vfat";
+              };
+              "/swap" = {
+                device = "/dev/disk/by-uuid/34bf072f-7e3a-465b-ac57-ba1929007852";
+                fsType = "swap";
+              };
+            };
+
+            # --- Grouped Bare-metal Bootloader ---
+            boot = {
+              loader = {
+                # Enable desired bootloader, overriding common defaults
+                systemd-boot.enable = true;
+                # grub = { # Keep commented unless using GRUB
+                #   enable = true;
+                #   device = "/dev/sda";
+                # };
+              };
+              # Add other baremetal-specific boot settings here if needed
+            };
+
+            # --- Other baremetal settings ---
             networking.networkmanager.enable = lib.mkDefault true;
-            services.openssh.ports = [22];
-            # Add other baremetal specifics here
+            services.openssh.ports = [22]; # Override default SSH port
+
+            # Add graphics, sound, etc. here
+            # hardware.opengl.enable = true;
+            # sound.enable = true;
           };
         };
       };
-
-      # System state version
-      system.stateVersion = "24.11";
     } # End of the first block for mkMerge
 
     # --- Block 2: Conditional Configuration for Default ---
     (lib.mkIf (config.specialisation == {}) {
       # Settings ONLY for the default build when no specialisation is chosen
-      # Example: Maybe set a default hostname or enable a specific service
-      # networking.hostName = lib.mkDefault "nix-ws-default";
-      # services.nginx.enable = true;
+      # Inherits safe defaults from common section.
     }) # End of the second block (mkIf) for mkMerge
   ]; # End of list for mkMerge
 }

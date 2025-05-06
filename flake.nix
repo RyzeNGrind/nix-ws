@@ -34,6 +34,7 @@
     pre-commit-hooks,
     trustix,
     opnix,
+    self,
     ...
   }: let
     # Define system-independent overlays here
@@ -84,9 +85,16 @@
         pre-commit = {
           check.enable = true;
           settings = {
+            # Remove the global exclude since it's not a valid option at this level
+            # Instead configure excludes per hook
+
             hooks = {
               alejandra.enable = true;
-              deadnix.enable = true;
+              # Add exclude pattern to deadnix hook
+              deadnix = {
+                enable = true;
+                excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
+              };
               statix.enable = true;
               prettier.enable = true;
             };
@@ -138,7 +146,7 @@
             {nix.settings.trusted-users = ["ryzengrind"];}
           ];
           specialArgs = {
-            inherit inputs;
+            inherit inputs self;
             pkgs = import nixpkgs {
               system = "x86_64-linux";
               overlays = [
@@ -151,7 +159,7 @@
         };
         homeConfigurations.ryzengrind = home-manager.lib.homeManagerConfiguration {
           extraSpecialArgs = {
-            inherit inputs;
+            inherit inputs self;
           };
           pkgs = import nixpkgs {
             system = "x86_64-linux";
