@@ -29,8 +29,8 @@
     "nixos/flake.nix".source = "${self}/flake.nix";
     "nixos/flake.lock".source = "${self}/flake.lock";
     # These are relative to *this* file, so ./ is okay here
-    "nixos/configuration.nix".source = ./configuration.nix;
-    "nixos/hardware-configuration.nix".source = ./hardware-configuration.nix;
+    "nixos/configuration.nix".source = "${self}/configuration.nix";
+    "nixos/hardware-configuration.nix".source = "${self}/hardware-configuration.nix";
   };
   imports = [
     # Include the results of the hardware scan.
