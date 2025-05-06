@@ -85,9 +85,7 @@
         pre-commit = {
           check.enable = true;
           settings = {
-            # Remove the global exclude since it's not a valid option at this level
-            # Instead configure excludes per hook
-
+            # Configure excludes per hook
             hooks = {
               alejandra.enable = true;
               # Add exclude pattern to deadnix hook
@@ -95,13 +93,17 @@
                 enable = true;
                 excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
               };
-              statix.enable = true;
+              statix = {
+                enable = true;
+                #excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
+		excludes = ["hardware-configuration.nix"];
+
+              };
               prettier.enable = true;
             };
-	    excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
           };
         };
-
+        packages.pre-commit-run = config.pre-commit.run;
         devShells.default = pkgs.mkShell {
           name = "nix-config-dev-shell";
           nativeBuildInputs = with pkgs; [
