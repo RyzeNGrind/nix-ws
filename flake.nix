@@ -81,7 +81,9 @@
             prettier.enable = true;
           };
         };
-
+        checks = {
+          inherit (config.checks) pre-commit;
+        };
         packages = {
           pre-commit-run = config.checks.pre-commit;
           statix-config = pkgs.writeTextFile {
