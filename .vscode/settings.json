@@ -44,7 +44,7 @@
         "/run/current-system/sw/bin/bash",
         "-l",
         "-c",
-        "nix develop"
+        "nix develop || $SHELL"
       ],
       "icon": "terminal-linux",
       "overrideName": true
@@ -71,7 +71,7 @@
     "NixOS": {
       "path": "bash",
       "icon": "terminal-linux",
-      "args": ["-l", "-c", "nix develop"]
+      "args": ["-l", "-c", "nix develop || $SHELL"]
     }
   },
   "terminal.integrated.shellIntegration.enabled": true,
@@ -87,12 +87,12 @@
       "/bin/bash",
       "-l",
       "-c",
-      "nix develop"
+      "nix develop || $SHELL"
     ]
   },
   "terminal.integrated.automationProfile.linux": {
     "path": "bash",
-    "args": ["-l", "-c", "nix develop"]
+    "args": ["-l", "-c", "nix develop || $SHELL"]
   },
   "terminal.integrated.cwd": "${workspaceFolder}",
   "terminal.integrated.persistentSessionReviveProcess": "never",

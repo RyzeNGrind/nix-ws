@@ -116,11 +116,38 @@
         ms-vscode-remote.remote-ssh-edit
       ];
     };
+
+    # Add void-editor configuration (using the same module interface as vscode)
+    void-editor = {
+      enable = true;
+      enableExtensionUpdateCheck = false;
+      enableUpdateCheck = false;
+      package = pkgs.void-editor;
+      extensions = with pkgs.vscode-extensions; [
+        ms-vscode-remote.remote-containers
+        ms-vscode-remote.remote-wsl
+        ms-vscode-remote.remote-ssh
+        ms-vscode-remote.remote-ssh-edit
+      ];
+      userSettings = {
+        "editor.fontFamily" = "'JetBrainsMono Nerd Font', 'Droid Sans Mono', 'monospace'";
+        "editor.fontSize" = 14;
+        "terminal.integrated.fontFamily" = "'JetBrainsMono Nerd Font'";
+        "terminal.integrated.fontSize" = 14;
+        "workbench.colorTheme" = "Default Dark Modern";
+        "editor.minimap.enabled" = true;
+        "editor.bracketPairColorization.enabled" = true;
+        "files.autoSave" = "afterDelay";
+        "editor.formatOnSave" = true;
+        "window.zoomLevel" = 0;
+      };
+    };
   };
 
   nixpkgs.config.allowUnfreePredicate = pkg:
     builtins.elem (lib.getName pkg) [
       "1password-gui"
       "1password"
+      "void-editor" # Add void-editor to the allowUnfree list
     ];
 }

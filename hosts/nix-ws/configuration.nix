@@ -64,9 +64,9 @@ in {
         trusted-users = ["root" "@wheel" "ryzengrind"];
         # ... other nix settings ... (keep as before)
         experimental-features = ["auto-allocate-uids" "ca-derivations" "cgroups" "dynamic-derivations" "fetch-closure" "fetch-tree" "flakes" "git-hashing" "local-overlay-store" "mounted-ssh-store" "no-url-literals" "pipe-operators" "nix-command" "recursive-nix"];
-        substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org" "http://localhost:9001"];
-        trusted-substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org" "http://localhost:9001"];
-        trusted-public-keys = ["cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=" "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g=" "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk=" "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8=" "localhost:VXOPwgEJPB/fAiY+EopQY7gvVfQZyF1+ifn2NhYYJgA="];
+        substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org"];
+        trusted-substituters = ["https://cache.nixos.org" "https://nix-community.cachix.org" "https://cuda-maintainers.cachix.org" "https://ryzengrind.cachix.org" "https://ryzengrind-nix-config.cachix.org" "https://daimyo.cachix.org"];
+        trusted-public-keys = ["cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=" "cuda-maintainers.cachix.org-1:0dq3bujKpuEPMCX6U4WylrUDZ9JyUG0VpVZa7CNfq5E=" "ryzengrind.cachix.org-1:bejzYd+Baf3Mwua/xSeysm97G9JL8133glujCUCnK7g=" "ryzengrind-nix-config.cachix.org-1:V3lFs0Pd5noCZegBaSgnWGjGqJgY7XTcTKG/Baj8jXk=" "daimyo.cachix.org-1:IgolikHY/HwiVJWM2UoPhSK+dzGrJ3IgY0joV9VTpC8="];
         require-sigs = true;
         accept-flake-config = true;
         allow-dirty = true;
@@ -101,13 +101,40 @@ in {
             };
           };
         };
+        # Enable void-editor
+        void-editor = {
+          enable = true;
+          extensions = [];
+        };
       };
       environment = {
         etc = etcFiles;
         variables = displayVariable;
         shellAliases = {};
         pathsToLink = ["/share/bash-completion"];
-        systemPackages = with pkgs; [readline bashInteractive bash-completion ncurses wget jq git starship nix-ld binutils glibc gcc python3 nodejs zlib cachix attic-server attic-client _1password-cli _1password-gui-beta];
+        systemPackages = with pkgs; [
+          readline
+          bashInteractive
+          bash-completion
+          ncurses
+          wget
+          jq
+          git
+          starship
+          nix-ld
+          binutils
+          glibc
+          gcc
+          python3
+          nodejs
+          zlib
+          cachix
+          attic-server
+          attic-client
+          _1password-cli
+          _1password-gui-beta
+          void-editor
+        ];
       };
       # System state version
       system = {
@@ -197,10 +224,27 @@ in {
               initrd.systemd.enable = lib.mkForce false;
             };
 
-            services.logind.enable = lib.mkForce false;
+            # Disable various services not applicable in WSL environment
+            # Use conditional disabling to avoid errors when options don't exist
+            systemd.services =
+              lib.mapAttrs (name: _: {
+                enable = lib.mkForce false;
+              }) {
+                systemd-logind = {};
+                systemd-udevd = {};
+              };
+
+            # Disable targets/services that may not be needed in WSL
             systemd.targets.graphical.enable = lib.mkForce false;
-            services.udev.enable = lib.mkForce false;
-            hardware.opengl.enable = lib.mkForce false;
+
+            # Disable services selectively
+            services = {
+              # Disable udev if it exists
+              udev.enable = lib.mkDefault false;
+            };
+
+            # Disable opengl if it exists
+            hardware.opengl.enable = lib.mkDefault false;
           };
         };
 
