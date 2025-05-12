@@ -144,5 +144,36 @@
           ];
         };
       };
+      nixosConfigurations = {
+        workstation = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./modules/base-system.nix
+            ./modules/impermanence.nix
+            ./roles/workstation.nix
+            ./modules/home-config.nix
+          ];
+          specialArgs = { inherit inputs; };
+        };
+        server = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./modules/base-system.nix
+            ./modules/impermanence.nix
+            ./roles/server.nix
+            ./providers/oracle.nix
+          ];
+          specialArgs = { inherit inputs; };
+        };
+        edge = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./modules/base-system.nix
+            ./modules/impermanence.nix
+            ./roles/edge.nix
+          ];
+          specialArgs = { inherit inputs; };
+        };
+      };
     };
 }
