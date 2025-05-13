@@ -20,7 +20,8 @@ pkgs.nixosTest {
     };
     services.tailscale.enable = true;
     services.tailscale.authKeyFile = "/etc/tailscale-authkey";
-    environment.etc."tailscale-authkey".text = "tskey-auth-kJPa6qEFNB21CNTRL-yFXrrFryWdjwZofxfoUecj9LhgdKfooV8";
+    # WARNING: Unencrypted secret for local test only. Use sops-nix or agenix for production.
+    environment.etc."tailscale-authkey".text = "tskey-auth-kJhi8g4Zxb11CNTRL-jbiraaq8eEX3gmeCJwLSFXYUMG3a77vcf";
     services.zerotierone.enable = true;
     services.xserver.enable = true;
     services.xserver.displayManager.gdm.enable = true;
@@ -42,7 +43,8 @@ pkgs.nixosTest {
   testScript = ''
     machine.wait_for_unit("multi-user.target")
     machine.succeed("id ryzengrind")
-    machine.succeed("systemctl is-active tailscale")
+    machine.succeed("systemctl is-enabled tailscale")
+    machine.succeed("test -f /etc/tailscale-authkey")
     machine.succeed("systemctl is-active zerotierone")
     machine.succeed("systemctl is-active gdm")
     machine.succeed("systemctl is-active pipewire")
