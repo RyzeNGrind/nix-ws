@@ -98,6 +98,36 @@
         packages = {
           vscode-generic = pkgs.vscode-generic;
           void-editor = pkgs.void-editor;
+          liveusb = pkgs.nixosSystem {
+            system = "x86_64-linux";
+            modules = [
+              (import (builtins.fetchTarball {
+                url = "https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz";
+              }) + "/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix")
+              ({ pkgs, ... }: {
+                networking = {
+                  hostName = "nix-live-usb";
+                  useDHCP = false;
+                  interfaces.enp1s0.ipv4.addresses = [{ address = "192.168.1.15"; prefixLength = 24; }];
+                  defaultGateway = "192.168.1.1";
+                  nameservers = [ "192.168.1.1" "1.1.1.1" ];
+                };
+                services.openssh = {
+                  enable = true;
+                  permitRootLogin = "yes";
+                  passwordAuthentication = true;
+                };
+                users.users.root.password = "nixos";
+                environment.systemPackages = with pkgs; [ zerotierone cloudflared tailscale ];
+                services.zerotierone = {
+                  enable = true;
+                  joinNetworks = [ "fada62b0158621fe" ];
+                };
+                # Tailscale/Cloudflared: installed, not pre-logged in
+                system.stateVersion = "24.11";
+              })
+            ];
+          };
         };
         checks.nix-ws-e2e = pkgs.callPackage ./tests/nix-ws-e2e.nix {
           self = self';
@@ -105,6 +135,10 @@
           opnix = inputs.opnix.packages.${pkgs.system}.default;
         };
         checks.nix-ws-min = pkgs.callPackage ./tests/nix-ws-min.nix {
+          self = self';
+          pkgs = pkgs;
+        };
+        checks.liveusb-ssh-vpn = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
           self = self';
           pkgs = pkgs;
         };
