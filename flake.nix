@@ -99,7 +99,15 @@
           vscode-generic = pkgs.vscode-generic;
           void-editor = pkgs.void-editor;
         };
-        checks.nix-ws-e2e = pkgs.callPackage ./tests/nix-ws-e2e.nix { self = self'; };
+        checks.nix-ws-e2e = pkgs.callPackage ./tests/nix-ws-e2e.nix {
+          self = self';
+          agenix = inputs.agenix.packages.${pkgs.system}.default;
+          opnix = inputs.opnix.packages.${pkgs.system}.default;
+        };
+        checks.nix-ws-min = pkgs.callPackage ./tests/nix-ws-min.nix {
+          self = self';
+          pkgs = pkgs;
+        };
       };
     } // {
       # Expose extension sets at the top-level outputs for use in modules
@@ -110,11 +118,23 @@
             extensions.vscode-marketplace.kaliahayes.kolada
             extensions.vscode-marketplace.bbenoist.nix
           ];
+          cursor = [
+            extensions.vscode-marketplace.ieviev.nix-vscode-completions
+            extensions.vscode-marketplace.kaliahayes.kolada
+            extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.anysphere.remote-ssh
+            extensions.vscode-marketplace.anysphere.remote-wsl
+          ];
           vscodeDesktop = [
             extensions.vscode-marketplace.ieviev.nix-vscode-completions
             extensions.vscode-marketplace.kaliahayes.kolada
             extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.ms-vscode.remote-server
+            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
+            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
+            extensions.vscode-marketplace.ms-vscode.remote-repositories
             extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
+            extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
           ];
           nixos = [
             extensions.vscode-marketplace.ieviev.nix-vscode-completions
@@ -124,6 +144,13 @@
             extensions.vscode-marketplace.jnoortheen.nix-ide
             extensions.vscode-marketplace.kamadorueda.alejandra
             extensions.vscode-marketplace.mkhl.direnv
+          ];
+          nonNix = [
+            extensions.vscode-marketplace.ieviev.nix-vscode-completions
+            extensions.vscode-marketplace.kaliahayes.kolada
+            extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.ms-azuretools.vscode-docker
+            extensions.vscode-marketplace.github.vscode-github-actions
           ];
         };
         aarch64-linux = let extensions = nix-vscode-extensions.extensions.aarch64-linux; in {
@@ -132,11 +159,23 @@
             extensions.vscode-marketplace.kaliahayes.kolada
             extensions.vscode-marketplace.bbenoist.nix
           ];
+          cursor = [
+            extensions.vscode-marketplace.ieviev.nix-vscode-completions
+            extensions.vscode-marketplace.kaliahayes.kolada
+            extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.anysphere.remote-ssh
+            extensions.vscode-marketplace.anysphere.remote-wsl
+          ];
           vscodeDesktop = [
             extensions.vscode-marketplace.ieviev.nix-vscode-completions
             extensions.vscode-marketplace.kaliahayes.kolada
             extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.ms-vscode.remote-server
+            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
+            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
+            extensions.vscode-marketplace.ms-vscode.remote-repositories
             extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
+            extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
           ];
           nixos = [
             extensions.vscode-marketplace.ieviev.nix-vscode-completions
@@ -146,6 +185,13 @@
             extensions.vscode-marketplace.jnoortheen.nix-ide
             extensions.vscode-marketplace.kamadorueda.alejandra
             extensions.vscode-marketplace.mkhl.direnv
+          ];
+          nonNix = [
+            extensions.vscode-marketplace.ieviev.nix-vscode-completions
+            extensions.vscode-marketplace.kaliahayes.kolada
+            extensions.vscode-marketplace.bbenoist.nix
+            extensions.vscode-marketplace.ms-azuretools.vscode-docker
+            extensions.vscode-marketplace.github.vscode-github-actions
           ];
         };
       };
