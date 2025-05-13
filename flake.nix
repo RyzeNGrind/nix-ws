@@ -99,6 +99,7 @@
           vscode-generic = pkgs.vscode-generic;
           void-editor = pkgs.void-editor;
         };
+        checks.nix-ws-e2e = pkgs.callPackage ./tests/nix-ws-e2e.nix { self = self'; };
       };
     } // {
       # Expose extension sets at the top-level outputs for use in modules
