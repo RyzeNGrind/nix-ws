@@ -98,7 +98,7 @@
         packages = {
           vscode-generic = pkgs.vscode-generic;
           void-editor = pkgs.void-editor;
-          liveusb = pkgs.nixosSystem {
+          liveusb = nixpkgs.lib.nixosSystem {
             system = "x86_64-linux";
             modules = [
               (import (builtins.fetchTarball {
@@ -108,7 +108,7 @@
                 networking = {
                   hostName = "nix-live-usb";
                   useDHCP = false;
-                  interfaces.enp1s0.ipv4.addresses = [{ address = "192.168.1.15"; prefixLength = 24; }];
+                  interfaces.eno2.ipv4.addresses = [{ address = "192.168.1.15"; prefixLength = 24; }];
                   defaultGateway = "192.168.1.1";
                   nameservers = [ "192.168.1.1" "1.1.1.1" ];
                 };
@@ -127,6 +127,7 @@
                 system.stateVersion = "24.11";
               })
             ];
+            pkgs = import nixpkgs { system = "x86_64-linux"; config.allowUnfree = true; };
           };
         };
         checks.nix-ws-e2e = pkgs.callPackage ./tests/nix-ws-e2e.nix {
