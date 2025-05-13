@@ -21,7 +21,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     opnix = {
-      url = "github:1Password/opnix";
+      url = "github:brizzbuzz/opnix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     disko = {
@@ -148,15 +148,7 @@
           ];
         };
       };
-      nixosConfigurations = hive.lib.mkNixosConfigurations {
-        cluster = import ./clusters/default.nix;
-        modules = [
-          ./modules/base-system.nix
-          ./modules/impermanence.nix
-          ./modules/home-config.nix
-          ./modules/secrets.nix
-        ];
-        specialArgs = { inherit inputs; };
-      };
+      # TODO: hive.mkNixosConfigurations is not available. Use a direct pattern for now.
+      nixosConfigurations = {};
     };
 }
