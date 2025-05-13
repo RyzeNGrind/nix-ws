@@ -231,6 +231,13 @@
         };
       };
       # TODO: hive.mkNixosConfigurations is not available. Use a direct pattern for now.
-      nixosConfigurations = {};
+      nixosConfigurations = (nixosConfigurations or { }) // {
+        liveusb = import ./hosts/liveusb.nix;
+        nix-ws = import ./hosts/nix-ws.nix;
+      };
+      homeConfigurations = (homeConfigurations or { }) // {
+        "ryzengrind@liveusb" = import ./home/ryzengrind.nix { inherit inputs; host = "liveusb"; };
+        "ryzengrind@nix-ws" = import ./home/ryzengrind.nix { inherit inputs; host = "nix-ws"; };
+      };
     };
 }
