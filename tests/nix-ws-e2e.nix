@@ -1,4 +1,4 @@
-{ self, pkgs }:
+{ self, pkgs, agenix, opnix }:
 
 pkgs.nixosTest {
   name = "nix-ws-e2e";
@@ -19,17 +19,20 @@ pkgs.nixosTest {
       extraGroups = [ "wheel" "networkmanager" ];
     };
     services.tailscale.enable = true;
+    services.tailscale.authKeyFile = "/etc/tailscale-authkey";
+    environment.etc."tailscale-authkey".text = "tskey-auth-kJPa6qEFNB21CNTRL-yFXrrFryWdjwZofxfoUecj9LhgdKfooV8";
     services.zerotierone.enable = true;
     services.xserver.enable = true;
     services.xserver.displayManager.gdm.enable = true;
     services.xserver.desktopManager.gnome.enable = true;
     services.openssh.enable = true;
     services.pipewire.enable = true;
-    # Secret management (mocked for test)
-    environment.systemPackages = with pkgs; [ agenix sops opnix ];
-    # Editors and devshells
+    # Secret management, editors, and devshells
     environment.systemPackages = with pkgs; [
-      (import ../overlays/void-editor/package.nix { inherit pkgs; })
+      agenix
+      sops
+      opnix
+      (pkgs.callPackage ../overlays/void-editor/package.nix { })
       vscodium
       # Add code-cursor and extensions if available
     ];
