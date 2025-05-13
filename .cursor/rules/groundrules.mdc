@@ -3,9 +3,61 @@ description:
 globs: 
 alwaysApply: true
 ---
-This rule is helpful for git commit msgs and for maintaining a IaC iterable Nix monorepo experimental ci to stable cd production homelab pipeline and hybrid cluster.
-Ensure you always group your commits per conventional commit structure then local push a detailed concise git commit msg via cmdline. I will provide git access if you dont have my token authorization in the dev env already. Only remote push the flake and its products when you have confirmed and validated successful builds, tests and activations apply same rules where you only fork from branches that are validated so we know the codebase started from a known working checkpoint that has been git tagged and released from previous successful CI. Maintain  semantic versionning and tagging of tags/hostnames/modules/functions and always mentally account for user $SHELL and $TERM env vars <by echoing them and you can markdown the env var key-values in @agent-devshell.nix> such as fish, bash as default fallback, zsh, nushell , zellij, ghostty, powershell, nixos-wsl via windows terminal or termius client.
+# Agent Ground Rules & Operational Protocol
 
-Be a benevolent CRUD is crude but more is possible deterministic experimental agent[<use gamification on tool calls to see what alternative query search could provide better random context to infer structured patterns and data from> Gamified Adversarial Prompting (GAP): Crowdsourcing AI-weakness-targeting data through gamification. Boost model performance with community-driven, strategic data collection ](https://github.com/fraction-ai/GAP) but since we lack community we make up for it in random iterations denoising towards our goal and error correcting across the prompt request mid tokens or during <thinking>, more iterating towards the mission, objective overall goal. 
+This document outlines the rules and operational protocols for the AI agent. The primary goal is to assist in maintaining an IaC iterable Nix monorepo, progressing from experimental CI to stable CD production for a homelab pipeline and hybrid cluster.
 
-Create and Note it down in a file called @DELIVERABLES.mdc if you have to. You should only be talking to the user to resume toolCalls past 25 limit, but optimize as we only have 50 requests at reaching the [DELIVERABLES.md](mdc:DELIVERABLES.md) before rate limiting dooms mankind from progress and we will be switching from Cursor to other preferred open source editors:{void-editor, zed-editor, vscodium, vscode} with essentially a better extension and provider agnostic inference stack.
+## GitOps & Nix Monorepo Professional Workflow
+
+1.  **Pre-Change Discipline**
+    *   Always run `git status` before making changes to understand the current working tree and staging area.
+    *   Review the output for unstaged, staged, and untracked files.
+
+2.  **Staging & Commit Hygiene**
+    *   Stage only the files relevant to the logical change (`git add -p` or `git add <file>`).
+    *   Use [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages (e.g., `feat:`, `fix:`, `chore:`, `docs:`, `ci:`, `build:`, `refactor:`, `perf:`, `test:`). Ensure you always group your commits per conventional commit structure.
+    *   Write concise, descriptive, and detailed commit messages that reflect the intent and scope of the change. These should be suitable for `git commit` via the command line.
+        *   *User will provide Git access if token authorization is not already present in the dev environment.*
+
+3.  **Validation Before Commit & Push**
+    *   Run all relevant Nix builds and tests (`nix flake check`, `nixos-rebuild test`, or custom test suites).
+    *   If tests fail, **do not commit or push**. Fix the issues, restage, and revalidate.
+    *   Amend the previous commit (`git commit --amend`) if the change is a direct fix, or create a new commit if it is a logical follow-up.
+    *   Only perform a local push (`git push` to a local/test ref if applicable) or equivalent internal state update after successful builds and tests.
+    *   **Remote push** the flake and its products (e.g., to `origin`) *only when you have confirmed and validated successful builds, tests, and activations.*
+
+4.  **Post-Commit Discipline a successful commit (and before any remote push), rerun `git status` to ensure a clean working directory.
+
+5.  **Branching, Tagging & Versioning**
+    *   Only fork or create new branches from branches that are validated, have passed CI, and ideally are git tagged as known working checkpoints.
+    *   Maintain semantic versioning for releases.
+    *   Tag significant states: releases, host configurations, modules, and functions as appropriate (e.g., `tags/hostnames/modules/functions`).
+
+6.  **Environment Awareness**
+    *   Always mentally account for and be prepared to operate within the user's `$SHELL` and `$TERM` environment variables.
+    *   If necessary, echo these variables to confirm. You can markdown the env var key-values in a file named `@agent-devshell.nix` for documentation.
+    *   Supported shells include `fish`, `bash` (as default fallback), `zsh`, `nushell`.
+    *   Supported terminal environments include `zellij`, `ghostty`, and standard terminals used by `powershell` (on Windows host), `nixos-wsl` via Windows Terminal, or Termius client.
+
+## Agent Philosophy, Behavior & Problem Solving
+
+1.  **Core Mandate:** The agent must never skip the workflow steps outlined above. If unable to perform a step directly (e.g., due to tool limitations or permissions), it must output the exact shell commands or detailed steps for the user to execute.
+2.  **Accountability:** If the agent fails to follow these rules, the user is encouraged to update this file and hold the agent accountable for adherence in future interactions.
+3.  **Problem Solving Approach: Benevolent Iteration & Denoising**
+    *   Be a "benevolent CRUD (Create, Read, Update, Delete) is crude, but more is possible" deterministic experimental agent.
+    *   Employ iterative refinement and error correction (denoising) to progress towards the mission objective or overall goal. This may involve re-evaluating steps or outputs mid-process ("thinking" phase).
+4.  **Gamified Adversarial Prompting (GAP) for Contextual Enrichment (Experimental):**
+    *   As a secondary strategy, use gamification on tool calls to explore alternative query searches. The aim is to gather diverse random context that might help infer structured patterns and data. [Ref: GAP - Crowdsourcing AI-weakness-targeting data](https://github.com/fraction-ai/GAP).
+    *   However, this experimental approach must *never* compromise the core workflow discipline and validation steps. It's for augmenting understanding, not for producing unvalidated outputs.
+
+## Deliverables, Interaction, and Constraints
+
+1.  **Deliverables Documentation:** If significant artifacts, decisions, or complex outputs are generated, note them down in a file called `@DELIVERABLES.mdc`.
+2.  **Interaction Limits & Optimization:**
+    *   User interaction should primarily be for resuming `toolCalls` if a hard limit (e.g., 25) is approached or for critical clarifications.
+    *   Optimize your actions to achieve the objectives efficiently, as there might be an overall request limit (e.g., 50 requests) before rate limiting hinders progress. Strive to reach the state described in `@DELIVERABLES.mdc` within these constraints.
+3.  **Editor Agnosticism:** Be aware that development may switch between various editors, including (but not limited to) Cursor, Void-Editor, Zed-Editor, VSCodium, and VSCode. The underlying inference stack and extension capabilities should be considered provider-agnostic where possible.
+
+---
+
+**If you see this file, you are expected to follow these rules for every change and interaction. No exceptions.**
