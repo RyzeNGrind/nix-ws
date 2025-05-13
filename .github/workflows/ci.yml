@@ -1,0 +1,24 @@
+name: Nix Flake CI
+
+on:
+  push:
+    branches: [ main, rebase-frameworks ]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v24
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+      - name: Nix flake check
+        run: nix flake check --show-trace
+      - name: Build void-editor
+        run: nix build .#void-editor
+      - name: Build vscode-generic
+        run: nix build .#vscode-generic
+      - name: Validate devShell activation
+        run: nix develop .#void-editor --command which void 

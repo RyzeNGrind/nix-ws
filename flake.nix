@@ -20,6 +20,10 @@
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    opnix = {
+      url = "github:1Password/opnix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     disko = {
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -61,7 +65,7 @@
     extra-experimental-features = [ "nix-command" "flakes" ];
   };
 
-  outputs = inputs@{ self, flake-parts, std, hive, nixpkgs, nixpkgs-unstable, void-editor-pr, void-fork, home-manager, sops-nix, agenix, nix-vscode-extensions, ... }:
+  outputs = inputs@{ self, flake-parts, std, hive, nixpkgs, nixpkgs-unstable, void-editor-pr, void-fork, home-manager, sops-nix, agenix, opnix, nix-vscode-extensions, ... }:
     flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [ "x86_64-linux" "aarch64-linux" ];
       imports = [ ];
@@ -144,36 +148,15 @@
           ];
         };
       };
-      nixosConfigurations = {
-        workstation = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./modules/base-system.nix
-            ./modules/impermanence.nix
-            ./roles/workstation.nix
-            ./modules/home-config.nix
-          ];
-          specialArgs = { inherit inputs; };
-        };
-        server = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./modules/base-system.nix
-            ./modules/impermanence.nix
-            ./roles/server.nix
-            ./providers/oracle.nix
-          ];
-          specialArgs = { inherit inputs; };
-        };
-        edge = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            ./modules/base-system.nix
-            ./modules/impermanence.nix
-            ./roles/edge.nix
-          ];
-          specialArgs = { inherit inputs; };
-        };
+      nixosConfigurations = hive.lib.mkNixosConfigurations {
+        cluster = import ./clusters/default.nix;
+        modules = [
+          ./modules/base-system.nix
+          ./modules/impermanence.nix
+          ./modules/home-config.nix
+          ./modules/secrets.nix
+        ];
+        specialArgs = { inherit inputs; };
       };
     };
 }
