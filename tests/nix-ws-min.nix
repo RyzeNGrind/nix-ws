@@ -1,8 +1,8 @@
-{ self, pkgs }:
+{ self, pkgs, lib ? pkgs.lib }:
 
 pkgs.nixosTest {
   name = "nix-ws-min";
-  nodes.machine = { config, pkgs, ... }: {
+  nodes.machine = { config, pkgs, lib, ... }: {
     networking.hostName = "nix-ws";
     users.users.ryzengrind = {
       isNormalUser = true;
@@ -13,7 +13,9 @@ pkgs.nixosTest {
     services.tailscale.authKeyFile = "/etc/tailscale-authkey";
     environment.etc."tailscale-authkey".text = "tskey-auth-kJhi8g4Zxb11CNTRL-jbiraaq8eEX3gmeCJwLSFXYUMG3a77vcf";
     services.zerotierone.enable = true;
-    # Optionally: services.cloudflared.enable = true;
+    # Mask VPN services for fast test
+    systemd.services.tailscale.wantedBy = lib.mkForce [];
+    systemd.services.zerotierone.wantedBy = lib.mkForce [];
     system.stateVersion = "24.11";
   };
 
