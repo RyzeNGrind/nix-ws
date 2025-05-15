@@ -76,3 +76,112 @@ Address:	127.0.0.1:53
 
 - Stack: web3 interface, consider connecting to oracles like tradekeep.io private and public data sources. Users can provide custom ingests but all ingests and data should go through verification and sanitation to ensure agent quality improves over time but doesnt get creatively hindered in its own process or method
 
+# - __documentation philosophy__:**[Priority:Highest]**
+  - implement [_`kattelhasen`_](https://srid.ca/zettelkasten) style site markdown for structured knowledge linking and retrieval
+  - migrate documentation to [_`emanote`_](https://emanote.srid.ca/) for enhanced navigation, folgezettel sequencing, and bidirectional linking
+  - develop site structure for [_`ryzengrind.xyz`_](http://ryzengrind.xyz) following networked thought principles
+  - integrate LLM-friendly markdown patterns with explicitly tagged metadata and relation indicators
+  - establish commonmark compliant document structure with semantic sectioning and typed links
+  - implement knowledge graph visualization for related concepts and dependency chains
+  - create frequent connection points between technical implementations and conceptual documentation
+  - maintain "evergreen" living documentation that evolves alongside code implementations
+  - use folgezettel numbering for establishing clear hierarchical relationships while preserving network linking
+  - capture decision contexts with dated journal entries linked to implementation notes
+  - design prompt templates embedded in documentation for consistent LLM guidance
+  - establish clear separation between implementation details, conceptual understanding, and procedural knowledge
+
+# - __nix build system__:**[Priority:High]**
+  - adopt **nix-fast-build** as the default builder for all future flaking and nixing operations
+  - integrate parallel evaluation with `nix-eval-jobs` for accelerated multi-system builds
+  - implement remote building infrastructure with optimized source transfer protocols
+  - configure Cachix and Attic binary cache integration for distributed team development
+  - establish standardized CI output formatting with JUNIT reporting
+  - implement build skipping for cached derivations to optimize development workflows
+  - create specialized build profiles for different hardware targets (aarch64, x86_64)
+  - set up flake-based automated testing integrated with nix-fast-build
+  - configure the following command as the standard build pattern:
+    ```nix
+    nix-fast-build --skip-cached --systems "$(nix eval --raw --impure --expr builtins.currentSystem)" --result-format junit --result-file result.xml
+    ```
+  - evaluate parallel build resource requirements for local vs remote execution
+  - document build process expectations for kotlin-generated-containers and flavor-backshots
+
+# - __terminal_integration__:**[Priority:High]**
+  - implement terminal emulator selection matrix prioritizing GPU-accelerated solutions and NixOS integration
+  - configure [_`ghostty`_](https://ghostty.org) as primary terminal emulator for native performance and MCP protocol support
+    ```nix
+    # flake.nix terminal module snippet
+    inputs.ghostty.url = "github:tryghost/ghostty-nix";
+    outputs = { nixpkgs, ghostty, ... }: {
+      nixosModules.terminals = { config, ... }: {
+        imports = [ ghostty.nixosModules.default ];
+        environment.systemPackages = [ ghostty.packages.${config.nixpkgs.system}.default ];
+        programs.ghostty = {
+          enable = true;
+          settings = {
+            font-family = "JetBrainsMono Nerd Font Mono";
+            font-size = 12.5;
+            window-padding-x = 15;
+            window-padding-y = 15;
+            cursor-style = "beam";
+            cursor-blink-interval = 750;
+            cursor-blink-mode = "on";
+            background-opacity = 0.96;
+          };
+        };
+      };
+    };
+    ```
+  - add fallback support for Alacritty as lightweight cross-platform alternative
+  - provide MCP-aware terminal integration with NixOS for seamless interaction between shells and development tools
+  - configure WebSSH for secure remote terminal access from web browsers
+    ```nix
+    # webssh.nix
+    { config, pkgs, ... }:
+    {
+      services.webssh = {
+        enable = true;
+        port = 8888;
+        credentialless = false;
+        host = "0.0.0.0";
+        package = pkgs.python3Packages.webssh;
+        extraArgs = "--xsrf=False --policy=reject"; # Strict security
+      };
+      networking.firewall.allowedTCPPorts = [ 8888 ];
+    }
+    ```
+  - establish mobile-friendly terminal access via Qute/Termux for Android devices
+  - create unified shell configuration management across all terminal types:
+    ```nix
+    # shared shell configuration
+    home.file.".config/shell/common.sh".text = ''
+      # Common shell settings across all terminals
+      export EDITOR=nvim
+      export VISUAL=nvim
+      export TERM=xterm-256color
+      export COLORTERM=truecolor
+      
+      # Path configuration for development tools
+      export PATH=$HOME/.local/bin:$PATH
+      
+      # MCP integration helpers
+      source ${config.xdg.configHome}/mcp/shell-integration.sh
+    '';
+    ```
+  - implement terminal multiplexer auto-configuration (tmux, zellij) for persistent sessions across access methods
+  - configure terminal-specific flake shells for development environment consistency:
+    ```nix
+    # Create project-specific environments
+    devShells.${system}.terminals = pkgs.mkShell {
+      buildInputs = with pkgs; [
+        ghostty
+        alacritty
+        python3Packages.webssh
+        zellij
+        tmux
+      ];
+      shellHook = ''
+        export TERM_INTEGRATION_PATH="$PWD/.terminal-integration"
+        echo "Terminal development environment activated"
+      '';
+    };
