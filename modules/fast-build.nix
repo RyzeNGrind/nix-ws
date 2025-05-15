@@ -92,18 +92,20 @@ in
     nix.settings = {
       builders-use-substitutes = true;
       
-      substituters = mkMerge ([
-        "https://cache.nixos.org/"
-        "https://nixpkgs-ci.cachix.org"
-      ] ++ (map (name: "https://${name}.cachix.org") cfg.substituters.cachix)
-        ++ (map (attic: attic.url) cfg.substituters.attic)
-        ++ cfg.substituters.additional);
+      substituters = mkMerge [
+        [ "https://cache.nixos.org/" ]
+        [ "https://nixpkgs-ci.cachix.org" ]
+        (map (name: "https://${name}.cachix.org") cfg.substituters.cachix)
+        (map (attic: attic.url) cfg.substituters.attic)
+        cfg.substituters.additional
+      ];
         
-      trusted-public-keys = mkMerge ([
-        "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
-        "nixpkgs-ci.cachix.org-1:D/DUreGnMgKVRcw6d/5WxgBDev0PqYElnVB+hZJ+JWw="
-      ] ++ (map (attic: attic.publicKey) cfg.substituters.attic)
-        ++ cfg.substituters.additionalTrustedPublicKeys);
+      trusted-public-keys = mkMerge [
+        [ "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=" ]
+        [ "nixpkgs-ci.cachix.org-1:D/DUreGnMgKVRcw6d/5WxgBDev0PqYElnVB+hZJ+JWw=" ]
+        (map (attic: attic.publicKey) cfg.substituters.attic)
+        cfg.substituters.additionalTrustedPublicKeys
+      ];
 
       builders = if cfg.remoteBuilders == [] then null else concatMapStringsSep " ; " (builder:
         let

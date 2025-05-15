@@ -1,4 +1,4 @@
-{ lib, config, pkgs, std ? null, hive ? null, devmods ? null, flakelight ? null, ...
+{ lib, config, pkgs, inputs, ...
 }:
 
 # Define local common configuration in case the global one isn't available
@@ -65,12 +65,6 @@ let
 in
 {
   imports = [
-    # Standard imports
-    (std.nixosModules.default or null)
-    (hive.nixosModules.default or null)
-    (devmods.nixosModules.default or null)
-    (flakelight.nixosModules.default or null)
-    
     # Specific modules
     ../modules/overlay-networks.nix
     ../modules/devshell.nix

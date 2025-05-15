@@ -120,8 +120,6 @@
                   vscode-generic = pkgs.vscode-generic;
                   void-editor = pkgs.void-editor;
                   # The liveusb package is defined below in the outputs section
-                  x86_64-linux = {
-                  };
         };
         checks.nix-ws-min = pkgs.callPackage ./tests/nix-ws-min.nix {
           self = self';
@@ -244,40 +242,52 @@
               liveusb = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
-                  self.nixosCommon # Import common modules
+                  # Import common modules individually
+                  ./modules/common-config.nix
+                  ./modules/build-system.nix
+                  ./modules/fast-build.nix
                   ./hosts/liveusb.nix
                   ({ modulesPath, ... }: {
                     imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
                   })
                   # Configure fast-build for this host
                   { nix.fastBuild.enable = true; }
+                  # Apply common configuration settings
+                  {
+                    nixpkgs.config.allowUnfree = true;
+                    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+                  }
                 ];
-                specialArgs = {
-                  inherit self inputs;
-                  std = inputs.std or null;
-                  hive = inputs.hive or null;
+                specialArgs = with inputs; {
+                  inherit self inputs nixpkgs;
                 };
               };
               nix-ws = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
-                  self.nixosCommon # Import common modules
+                  # Import common modules individually
+                  ./modules/common-config.nix
+                  ./modules/build-system.nix
+                  ./modules/fast-build.nix
                   ./hosts/nix-ws.nix
                   # Configure fast-build for this host
                   { nix.fastBuild.enable = true; }
+                  # Apply common configuration settings
+                  {
+                    nixpkgs.config.allowUnfree = true;
+                    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+                  }
                 ];
-                specialArgs = {
-                  inherit self inputs;
-                  std = inputs.std or null;
-                  hive = inputs.hive or null;
-                  devmods = inputs.devmods or null;
-                  flakelight = inputs.flakelight or null;
+                specialArgs = with inputs; {
+                  inherit self inputs nixpkgs;
                 };
               };
             };
             
             # Define the liveusb ISO image package as a flake output
-            packages.x86_64-linux.liveusb = self.nixosConfigurations.liveusb.config.system.build.isoImage;
+            packages.x86_64-linux = {
+              liveusb = self.nixosConfigurations.liveusb.config.system.build.isoImage;
+            };
       
       # Home Manager configurations with consistent user settings
       homeConfigurations = {} // {
