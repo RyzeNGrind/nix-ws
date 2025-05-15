@@ -1,42 +1,223 @@
 {
-    "git.enabled": true,
-    "git.path": "/run/current-system/sw/bin/git",
-    "git.useEditorAsCommitInput": true,
-    "git.autofetch": true,
-    "git.confirmSync": false,
-    "git.allowNoVerifyCommit": true,
-    "git.ignoreWindowsGit27Warning": true,
-    "git.terminalAuthentication": true,
-    "git.useIntegratedAskPass": false,
-    "git.autorefresh": true,
-    "git.branchProtection": [],
-    "git.branchProtectionPrompt": "alwaysPrompt",
-    "files.eol": "\n",
-    "editor.formatOnSave": true,
-    "editor.tabSize": 2,
-    "editor.insertSpaces": true,
-    "terminal.integrated.defaultProfile.linux": "bash",
-    "terminal.integrated.env.linux": {
-      "NIX_SHELL_ACTIVE": "1",
-      "PATH": "/run/current-system/sw/bin:${env:PATH}",
-      "SHELL": "/run/current-system/sw/bin/bash"
+  "fileNestingUpdater.autoUpdate": true,
+  "fileNestingUpdater.autoUpdateInterval": 720,
+  "fileNestingUpdater.promptOnAutoUpdate": true,
+  "fileNestingUpdater.upstreamRepo": "antfu/vscode-file-nesting-config",
+  "fileNestingUpdater.upstreamBranch": "main",
+  "window.commandCenter": 1,
+  "cursor.cpp.disabledLanguages": [],
+  "terminal.external.windowsExec": "${env:SystemRoot}\\System32\\wsl.exe -d NixOS",
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.defaultProfile.windows": "NixOS (WSL)",
+  "terminal.integrated.defaultProfile.linux": "NixOS",
+  "terminal.integrated.enableImages": true,
+  "terminal.integrated.useWslProfiles": false,
+  "terminal.integrated.ignoreProcessNames": [
+    "starship",
+    "oh-my-posh",
+    "bash",
+    "zsh",
+    "fish"
+  ],
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.integrated.env.windows": {
+    "VSCODE_PROFILE": "1",
+    "WSLENV": "VSCODE_WSL_EXT_LOCATION/up:VSCODE_SERVER_TAR/up:VSCODE_IPC_HOOK_CLI/up:PATH/u",
+    "SHELL": "/run/current-system/sw/bin/bash",
+    "NIX_SHELL_ACTIVE": "1",
+    "NIX_PATH": "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos:$HOME/.nix-defexpr/channels",
+    "NIX_PROFILES": "/nix/var/nix/profiles/default /run/current-system/sw $HOME/.nix-profile",
+    "NIX_SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt",
+    "PATH": "/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/run/wrappers/bin:/etc/profiles/per-user/ryzengrind/bin:/nix/var/nix/profiles/per-user/ryzengrind/bin:/usr/bin",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
+  },
+  "terminal.integrated.env.linux": {
+    "VSCODE_PROFILE": "1",
+    "SHELL": "/bin/bash",
+    "NIX_SHELL_ACTIVE": "1",
+    "NIX_PATH": "nixpkgs=/nix/var/nix/profiles/per-user/root/channels/nixos:$HOME/.nix-defexpr/channels",
+    "NIX_PROFILES": "/nix/var/nix/profiles/default /run/current-system/sw $HOME/.nix-profile",
+    "NIX_SSL_CERT_FILE": "/etc/ssl/certs/ca-certificates.crt",
+    "PATH": "/run/current-system/sw/bin:/nix/var/nix/profiles/default/bin:/run/wrappers/bin:/etc/profiles/per-user/ryzengrind/bin:/nix/var/nix/profiles/per-user/ryzengrind/bin:/usr/bin",
+    "LANG": "en_US.UTF-8",
+    "LC_ALL": "en_US.UTF-8"
+  },
+  "terminal.integrated.profiles.windows": {
+    "NixOS (WSL)": {
+      "path": [
+        "${env:windir}\\System32\\wsl.exe"
+      ],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/run/current-system/sw/bin/bash",
+        "-l"
+      ],
+      "icon": "terminal-linux",
+      "overrideName": true
     },
-    "terminal.integrated.profiles.linux": {
-      "bash": {
-        "path": "/run/current-system/sw/bin/bash",
-        "icon": "terminal-bash",
-        "args": [
-          "-l"
-        ]
-      }
+    "PowerShell": {
+      "source": "PowerShell",
+      "icon": "terminal-powershell",
+      "path": "${env:ProgramFiles}\\PowerShell\\7\\pwsh.exe",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass"
+      ]
     },
-    "[javascript]": {
-      "editor.defaultFormatter": "vscode.typescript-language-features"
+    "Command Prompt": {
+      "path": [
+        "${env:windir}\\Sysnative\\cmd.exe",
+        "${env:windir}\\System32\\cmd.exe"
+      ],
+      "args": [],
+      "icon": "terminal-cmd"
     },
-    "[json]": {
-      "editor.defaultFormatter": "vscode.json-language-features"
+    "Git Bash": {
+      "source": "Git Bash"
     },
-    "[nix]": {
-      "editor.defaultFormatter": "jnoortheen.nix-ide"
+    "Fish (NixOS-WSL)": {
+      "path": [
+        "${env:windir}\\System32\\wsl.exe"
+      ],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/run/current-system/sw/bin/fish",
+        "-l || exec $SHELL -l"
+      ],
+      "icon": "terminal-linux"
+    },
+    "Bash (NixOS-WSL)": {
+      "path": [
+        "${env:windir}\\System32\\wsl.exe"
+      ],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/bin/bash",
+        "-l"
+      ],
+      "icon": "terminal-linux"
+    },
+    "devFish (NixOS-WSL)": {
+      "path": [
+        "${env:windir}\\System32\\wsl.exe"
+      ],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/run/current-system/sw/bin/fish",
+        "-l",
+        "-c",
+        "nix develop || fish"
+      ],
+      "icon": "terminal-linux"
+    },
+    "devBash (NixOS-WSL)": {
+      "path": [
+        "${env:windir}\\System32\\wsl.exe"
+      ],
+      "args": [
+        "-d",
+        "NixOS",
+        "--cd",
+        "${workspaceFolder}",
+        "--exec",
+        "/run/current-system/sw/bin/bash",
+        "-l",
+        "-c",
+        "nix develop || bash"
+      ],
+      "icon": "terminal-linux"
     }
-  }
+  },
+  "terminal.integrated.profiles.linux": {
+    "NixOS": {
+      "path": "bash",
+      "icon": "terminal-linux",
+      "args": [
+        "-l"
+      ]
+    },
+    "Fish": {
+      "path": "fish",
+      "icon": "terminal-linux",
+      "args": [
+        "-l || exec $SHELL -l"
+      ]
+    },
+    "Bash": {
+      "path": "bash",
+      "icon": "terminal-linux",
+      "args": [
+        "-l"
+      ]
+    },
+    "devFish (NixOS Linux)": {
+      "path": "fish",
+      "icon": "terminal-linux",
+      "args": [
+        "-l",
+        "-c",
+        "nix develop || fish"
+      ]
+    },
+    "devBash (NixOS Linux)": {
+      "path": "bash",
+      "icon": "terminal-linux",
+      "args": [
+        "-l",
+        "-c",
+        "nix develop || bash"
+      ]
+    }
+  },
+  "terminal.integrated.automationProfile.windows": {
+    "path": "${env:windir}\\System32\\wsl.exe",
+    "args": [
+      "-d",
+      "NixOS",
+      "--cd",
+      "${workspaceFolder}",
+      "--exec",
+      "/bin/bash",
+      "-l",
+      "-c",
+      "nix develop; exec $SHELL"
+    ]
+  },
+  "terminal.integrated.automationProfile.linux": {
+    "path": "bash",
+    "args": [
+      "-li",
+      "-c",
+      "nix develop || exec $SHELL -l"
+    ]
+  },
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "git.path": "wsl.exe",
+  "git.useIntegratedAskPass": false,
+  "git.enabled": true,
+  "git.terminalAuthentication": true,
+  "editor.tabCompletion": "on",
+  "[nix]": {
+    "editor.defaultFormatter": "jnoortheen.nix-ide"
+  },
+  "files.autoSave": "afterDelay",
+  "remote.WSL.fileWatcher.polling": true,
+  "remote.WSL.debug": true
+}

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "mcp-router": {
+      "command": "wsl",
+      "args": [
+        "-d",
+        "NixOS",
+        "-u",
+        "ryzengrind",
+        "/bin/bash",
+        "-c",
+        "export MCPR_TOKEN='mcpr_y3uOMhJ90dxOElA27o23a5BKb_W5-jxC'; export NIX_CONNECT_TIMEOUT=15; export NIXPKGS_ALLOW_UNFREE=1; export NIXPKGS_ALLOW_INSECURE=1; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y mcpr-cli@latest connect'"
+      ]
+    }
+  }
+}

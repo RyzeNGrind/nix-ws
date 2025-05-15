@@ -1,7 +1,7 @@
-{ inputs, host ? null, ... }:
+{ inputs, host ? null, std ? null, hive ? null, devmods ? null, flakelight ? null, ... }:
 let
-  devmods = inputs ? devmods && inputs.devmods;
-  flakelight = inputs ? flakelight && inputs.flakelight;
+  devmods_ = inputs ? devmods && inputs.devmods;
+  flakelight_ = inputs ? flakelight && inputs.flakelight;
 in
 {
   home.username = "ryzengrind";
@@ -9,8 +9,11 @@ in
   home.stateVersion = "24.11";
   programs.home-manager.enable = true;
 
-  # Modular Home Manager config via divnix/std cells (add as needed)
   imports = [
+    (std.homeModules.default or null)
+    (hive.homeModules.default or null)
+    (devmods.homeModules.default or null)
+    (flakelight.homeModules.default or null)
     # ./shells.nix
     # ./editors.nix
     # ./dotfiles.nix
@@ -18,6 +21,6 @@ in
 
   # Devshells via devmods/flakelight if available
   devmods.shells =
-    if devmods != null && flakelight != null then [ flakelight.shells.minimal ] else [];
+    if devmods_ != null && flakelight_ != null then [ flakelight_.shells.minimal ] else [];
   # void-editor devshell is defined in void-editor.nix, do not duplicate
 }
