@@ -93,6 +93,11 @@
             config.allowUnfree = true;
           };
         };
+        generate-hardware-config-pkg = pkgs.writeShellApplication {
+          name = "generate-hardware-config";
+          runtimeInputs = with pkgs; [ coreutils gnugrep gawk util-linux ]; # Dependencies for the script
+          text = builtins.readFile ./scripts/generate-hardware-config.sh;
+        };
       in {
         _module.args.pkgs = import nixpkgs {
           inherit system;
@@ -103,7 +108,7 @@
           name = "nix-cfg-mgmt-shell";
           packages = with pkgs; [
             git gh pre-commit alejandra statix deadnix sops wslu # Added wslu for wslpath
-            self'.packages.generate-hardware-config # Add the script package
+            generate-hardware-config-pkg # Use let-bound variable
             inputs.nix-fast-build.packages.${system}.default
             inputs.nix-topology.packages.${system}.default # Add nix-topology package
             # inputs.nix-eval-jobs.packages.${system}.default # Temporarily commented out due to incompatibility
@@ -129,11 +134,7 @@
         packages = {
           vscode-generic = pkgs.vscode-generic;
           void-editor = pkgs.void-editor;
-          generate-hardware-config = pkgs.writeShellApplication {
-            name = "generate-hardware-config";
-            runtimeInputs = with pkgs; [ coreutils gnugrep gawk util-linux ]; # Dependencies for the script
-            text = builtins.readFile ./scripts/generate-hardware-config.sh;
-          };
+          generate-hardware-config = generate-hardware-config-pkg; # Assign let-bound variable
           # The liveusb package is defined below in the outputs section
         };
         checks.nix-ws-min = pkgs.callPackage ./tests/nix-ws-min.nix {
