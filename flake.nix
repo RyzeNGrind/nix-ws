@@ -141,153 +141,142 @@
         };
       };
     } // {
-      # Expose extension sets at the top-level outputs for use in modules
-      editorExtensionSets = {
-        x86_64-linux = let extensions = nix-vscode-extensions.extensions.x86_64-linux; in {
-          base = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-          ];
-          cursor = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.anysphere.remote-ssh
-            extensions.vscode-marketplace.anysphere.remote-wsl
-          ];
-          vscodeDesktop = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.ms-vscode.remote-server
-            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
-            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
-            extensions.vscode-marketplace.ms-vscode-remote.remote-repositories 
-            extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
-            extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
-          ];
-          nixos = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.arrterian.nix-env-selector
-            extensions.vscode-marketplace.jnoortheen.nix-ide
-            extensions.vscode-marketplace.kamadorueda.alejandra
-            extensions.vscode-marketplace.mkhl.direnv
-          ];
-          nonNix = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.ms-azuretools.vscode-docker
-            extensions.vscode-marketplace.github.vscode-github-actions
-          ];
-        };
-        aarch64-linux = let extensions = nix-vscode-extensions.extensions.aarch64-linux; in {
-          base = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-          ];
-          cursor = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.anysphere.remote-ssh
-            extensions.vscode-marketplace.anysphere.remote-wsl
-          ];
-          vscodeDesktop = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.ms-vscode.remote-server
-            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
-            extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
-            extensions.vscode-marketplace.ms-vscode-remote.remote-repositories
-            extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
-            extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
-          ];
-          nixos = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.arrterian.nix-env-selector
-            extensions.vscode-marketplace.jnoortheen.nix-ide
-            extensions.vscode-marketplace.kamadorueda.alejandra
-            extensions.vscode-marketplace.mkhl.direnv
-          ];
-          nonNix = [
-            extensions.vscode-marketplace.ieviev.nix-vscode-completions
-            extensions.vscode-marketplace.kaliahayes.kolada
-            extensions.vscode-marketplace.bbenoist.nix
-            extensions.vscode-marketplace.ms-azuretools.vscode-docker
-            extensions.vscode-marketplace.github.vscode-github-actions
-          ];
+      # Standard flake outputs
+      packages.x86_64-linux = {
+        liveusb = self.nixosConfigurations.liveusb.config.system.build.isoImage;
+      };
+
+      # Editor extension sets moved into outputs
+      overlays.editorExtensionSets = final: prev: {
+        editorExtensionSets = {
+          x86_64-linux = let extensions = nix-vscode-extensions.extensions.x86_64-linux; in {
+            base = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+            ];
+            cursor = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.anysphere.remote-ssh
+              extensions.vscode-marketplace.anysphere.remote-wsl
+            ];
+            vscodeDesktop = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.ms-vscode.remote-server
+              extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
+              extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
+              extensions.vscode-marketplace.ms-vscode-remote.remote-repositories
+              extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
+              extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
+            ];
+            nixos = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.arrterian.nix-env-selector
+              extensions.vscode-marketplace.jnoortheen.nix-ide
+              extensions.vscode-marketplace.kamadorueda.alejandra
+              extensions.vscode-marketplace.mkhl.direnv
+            ];
+            nonNix = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.ms-azuretools.vscode-docker
+              extensions.vscode-marketplace.github.vscode-github-actions
+            ];
+          };
+          aarch64-linux = let extensions = nix-vscode-extensions.extensions.aarch64-linux; in {
+            base = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+            ];
+            cursor = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.anysphere.remote-ssh
+              extensions.vscode-marketplace.anysphere.remote-wsl
+            ];
+            vscodeDesktop = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.ms-vscode.remote-server
+              extensions.vscode-marketplace.ms-vscode-remote.remote-ssh-edit
+              extensions.vscode-marketplace.ms-vscode-remote.remote-ssh
+              extensions.vscode-marketplace.ms-vscode-remote.remote-repositories
+              extensions.vscode-marketplace.ms-vscode-remote.remote-wsl
+              extensions.vscode-marketplace.ms-vscode-remote.vscode-remote-extensionpack
+            ];
+            nixos = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.arrterian.nix-env-selector
+              extensions.vscode-marketplace.jnoortheen.nix-ide
+              extensions.vscode-marketplace.kamadorueda.alejandra
+              extensions.vscode-marketplace.mkhl.direnv
+            ];
+            nonNix = [
+              extensions.vscode-marketplace.ieviev.nix-vscode-completions
+              extensions.vscode-marketplace.kaliahayes.kolada
+              extensions.vscode-marketplace.bbenoist.nix
+              extensions.vscode-marketplace.ms-azuretools.vscode-docker
+              extensions.vscode-marketplace.github.vscode-github-actions
+            ];
+          };
         };
       };
-      # Define the common NixOS configuration
-      nixosCommon = {
-        modules = [
+
+      # Common modules for NixOS configurations
+      nixosModules.common = { ... }: {
+        imports = [
           ./modules/common-config.nix
-          ./modules/build-system.nix # This might be superseded or complemented by fast-build.nix
-          ./modules/fast-build.nix   # Integrate the new fast-build module
+          ./modules/build-system.nix
+          ./modules/fast-build.nix
         ];
         nixpkgs.config.allowUnfree = true;
         nix.settings.experimental-features = [ "nix-command" "flakes" ];
       };
 
-      # TODO: hive.mkNixosConfigurations is not available. Use a direct pattern for now.
-      nixosConfigurations = {} // {
-              liveusb = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = [
-                  # Import common modules individually
-                  ./modules/common-config.nix
-                  ./modules/build-system.nix
-                  ./modules/fast-build.nix
-                  ./hosts/liveusb.nix
-                  ({ modulesPath, ... }: {
-                    imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
-                  })
-                  # Configure fast-build for this host
-                  { nix.fastBuild.enable = true; }
-                  # Apply common configuration settings
-                  {
-                    nixpkgs.config.allowUnfree = true;
-                    nix.settings.experimental-features = [ "nix-command" "flakes" ];
-                  }
-                ];
-                specialArgs = with inputs; {
-                  inherit self inputs nixpkgs;
-                };
-              };
-              nix-ws = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = [
-                  # Import common modules individually
-                  ./modules/common-config.nix
-                  ./modules/build-system.nix
-                  ./modules/fast-build.nix
-                  ./hosts/nix-ws.nix
-                  # Configure fast-build for this host
-                  { nix.fastBuild.enable = true; }
-                  # Apply common configuration settings
-                  {
-                    nixpkgs.config.allowUnfree = true;
-                    nix.settings.experimental-features = [ "nix-command" "flakes" ];
-                  }
-                ];
-                specialArgs = with inputs; {
-                  inherit self inputs nixpkgs;
-                };
-              };
-            };
-            
-            # Define the liveusb ISO image package as a flake output
-            packages.x86_64-linux = {
-              liveusb = self.nixosConfigurations.liveusb.config.system.build.isoImage;
-            };
+      # NixOS configurations
+      nixosConfigurations = {
+        liveusb = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.common
+            ./hosts/liveusb.nix
+            ({ modulesPath, ... }: {
+              imports = [ (modulesPath + "/installer/cd-dvd/installation-cd-minimal.nix") ];
+            })
+            # Configure fast-build for this host
+            { nix.fastBuild.enable = true; }
+          ];
+          specialArgs = with inputs; {
+            inherit self inputs nixpkgs;
+          };
+        };
+        
+        nix-ws = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            self.nixosModules.common
+            ./hosts/nix-ws.nix
+            # Configure fast-build for this host
+            { nix.fastBuild.enable = true; }
+            # Filesystem and bootloader are now managed in hosts/nix-ws.nix
+          ];
+          specialArgs = with inputs; {
+            inherit self inputs nixpkgs;
+          };
+        };
+      };
       
       # Home Manager configurations with consistent user settings
       homeConfigurations = {} // {
