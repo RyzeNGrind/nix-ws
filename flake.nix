@@ -59,6 +59,10 @@
       url = "github:nix-community/nix-eval-jobs"; # Reverted to original simple form
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-topology = {
+      url = "github:oddlama/nix-topology";
+      inputs.nixpkgs.follows = "nixpkgs"; # Ensure it uses the same nixpkgs
+    };
   };
 
   nixConfig = {
@@ -98,8 +102,10 @@
         devShells.default = pkgs.mkShell {
           name = "nix-cfg-mgmt-shell";
           packages = with pkgs; [
-            git gh pre-commit alejandra statix deadnix sops
+            git gh pre-commit alejandra statix deadnix sops wslu # Added wslu for wslpath
+            self'.packages.generate-hardware-config # Add the script package
             inputs.nix-fast-build.packages.${system}.default
+            inputs.nix-topology.packages.${system}.default # Add nix-topology package
             # inputs.nix-eval-jobs.packages.${system}.default # Temporarily commented out due to incompatibility
             nix-output-monitor
           ];
@@ -112,14 +118,23 @@
             echo "🚀 nix-fast-build is configured as the default builder"
             echo "Use 'nb' shorthand for nix-fast-build with cached derivations skipped"
             echo "Use 'nbe' to build only the current system with junit output"
+
+            # Alias for nix-topology
+            alias generate-topology='nix-topology --flake .# --out-link ./topology.svg && echo "Topology diagram generated: topology.svg"'
+            echo "🔷 Use 'generate-topology' to create a cluster topology diagram (topology.svg)"
           '';
         };
         devShells.void-editor = import ./devshells/void-editor.nix { inherit pkgs; };
         # Expose vscode-generic and void-editor as packages for direct flake builds
         packages = {
-                  vscode-generic = pkgs.vscode-generic;
-                  void-editor = pkgs.void-editor;
-                  # The liveusb package is defined below in the outputs section
+          vscode-generic = pkgs.vscode-generic;
+          void-editor = pkgs.void-editor;
+          generate-hardware-config = pkgs.writeShellApplication {
+            name = "generate-hardware-config";
+            runtimeInputs = with pkgs; [ coreutils gnugrep gawk util-linux ]; # Dependencies for the script
+            text = builtins.readFile ./scripts/generate-hardware-config.sh;
+          };
+          # The liveusb package is defined below in the outputs section
         };
         checks.nix-ws-min = pkgs.callPackage ./tests/nix-ws-min.nix {
           self = self';
@@ -240,6 +255,7 @@
           ./modules/common-config.nix
           ./modules/build-system.nix
           ./modules/fast-build.nix
+          inputs.nix-cloudflared.nixosModules.default # Or .cloudflared if 'default' is not the one
         ];
         nixpkgs.config.allowUnfree = true;
         nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -257,6 +273,16 @@
             })
             # Configure fast-build for this host
             { nix.fastBuild.enable = true; }
+            # Ensure no root password is set to avoid warnings
+            {
+              users.users.root = {
+                hashedPassword = null;
+                hashedPasswordFile = null;
+                password = null;
+                initialHashedPassword = null;
+                initialPassword = null;
+              };
+            }
           ];
           specialArgs = with inputs; {
             inherit self inputs nixpkgs;
@@ -270,6 +296,16 @@
             ./hosts/nix-ws.nix
             # Configure fast-build for this host
             { nix.fastBuild.enable = true; }
+            # Ensure no root password is set to avoid warnings
+            {
+              users.users.root = {
+                hashedPassword = null;
+                hashedPasswordFile = null;
+                password = null;
+                initialHashedPassword = null;
+                initialPassword = null;
+              };
+            }
             # Filesystem and bootloader are now managed in hosts/nix-ws.nix
           ];
           specialArgs = with inputs; {
