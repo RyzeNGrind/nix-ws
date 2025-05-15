@@ -2,11 +2,22 @@
 let
   devmods_ = inputs ? devmods && inputs.devmods;
   flakelight_ = inputs ? flakelight && inputs.flakelight;
+  
+  # Import the common-config module for access to the settings
+  commonModule = import ../modules/common-config.nix {
+    inherit (inputs) lib;
+    config = {};
+    pkgs = inputs.nixpkgs.legacyPackages.${builtins.currentSystem};
+  };
+  
+  # Extract the user configuration
+  userConfig = commonModule.config.commonConfig.userConfig;
 in
 {
-  home.username = "ryzengrind";
-  home.homeDirectory = "/home/ryzengrind";
-  home.stateVersion = "24.11";
+  # Use the common user settings
+  home.username = userConfig.name;
+  home.homeDirectory = userConfig.homeDirectory;
+  home.stateVersion = commonModule.config.commonConfig.nixConfig.stateVersion;
   programs.home-manager.enable = true;
 
   imports = [
