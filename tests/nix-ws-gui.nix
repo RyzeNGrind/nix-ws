@@ -11,16 +11,16 @@ pkgs.nixosTest {
     
     # Basic GUI services
     services.xserver.enable = true;
-    services.xserver.displayManager.sddm.enable = true;
+    services.displayManager.sddm.enable = true;
     services.xserver.desktopManager.plasma5.enable = true;
     
     # For faster testing
-    services.xserver.displayManager.autoLogin = {
+    services.displayManager.autoLogin = {
       enable = false;  # Disable actual auto-login for faster testing
     };
     
     # Hardware acceleration mocked
-    hardware.opengl.enable = true;
+    hardware.graphics.enable = true;
     
     system.stateVersion = "24.11";
   };
