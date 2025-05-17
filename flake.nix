@@ -351,9 +351,24 @@
       };
       
       # Home Manager configurations with consistent user settings
-      homeConfigurations = {} // {
-        "ryzengrind@liveusb" = import ./home/ryzengrind.nix { inherit inputs self; host = "liveusb"; };
-        "ryzengrind@nix-ws" = import ./home/ryzengrind.nix { inherit inputs self; host = "nix-ws"; };
+      homeConfigurations = {
+        "ryzengrind" = inputs.home-manager.lib.homeManagerConfiguration {
+          pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux; # Assuming x86_64-linux for this user
+          extraSpecialArgs = {
+            inherit inputs self;
+            # currentHostName = "nix-ws"; # You can pass custom args to your modules
+            # The home/ryzengrind.nix module can use these args for conditional config
+          };
+          modules = [
+            ./home/ryzengrind.nix # This should be a Home Manager module
+          ];
+        };
+        # Example for a separate liveusb configuration if needed:
+        # "ryzengrind-liveusb" = inputs.home-manager.lib.homeManagerConfiguration {
+        #   pkgs = inputs.nixpkgs.legacyPackages.x86_64-linux;
+        #   extraSpecialArgs = { inherit inputs self; currentHostName = "liveusb"; };
+        #   modules = [ ./home/ryzengrind.nix /* + ./home/liveusb-specific-hm.nix */ ];
+        # };
       };
     };
 }
