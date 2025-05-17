@@ -70,9 +70,9 @@ options.services.onepassword-ssh-agent = {
         text = ''
           #!/bin/bash
           echo "Placeholder for setup-1password-ssh-bridge.sh"
-          echo "Socket: ${cfg.socketPath}"
-          echo "Pipe: ${cfg.windowsPipeName}"
-          # exec ${pkgs.socat}/bin/socat UNIX-LISTEN:${cfg.socketPath},fork EXEC:${npiperelay-unwrapped}/npiperelay -ei -ep ${cfg.windowsPipeName},nofork
+          echo "Socket path would be (cfg.socketPath)"
+          echo "Pipe name would be (cfg.windowsPipeName)"
+          # exec (pkgs.socat)/bin/socat UNIX-LISTEN:(cfg.socketPath),fork EXEC:(npiperelay-unwrapped)/npiperelay -ei -ep (cfg.windowsPipeName),nofork
         '';
       };
       
@@ -82,8 +82,8 @@ options.services.onepassword-ssh-agent = {
         text = ''
           #!/bin/bash
           echo "Placeholder for test-1password-ssh.sh"
-          echo "Testing agent at ${cfg.socketPath}"
-          # SSH_AUTH_SOCK=${cfg.socketPath} ssh-add -l
+          echo "Testing agent at a path that would be (cfg.socketPath)"
+          # SSH_AUTH_SOCK=(cfg.socketPath) ssh-add -l
         '';
       };
 
@@ -93,8 +93,8 @@ options.services.onepassword-ssh-agent = {
         text = ''
           #!/bin/bash
           # Placeholder for 1Password SSH Agent environment setup
-          echo "Setting ONEWORD_SOCKET to ${cfg.socketPath}"
-          # ONEWORD_SOCKET="${cfg.socketPath}"
+          echo "Setting ONEWORD_SOCKET to a path that would be (cfg.socketPath)"
+          # ONEWORD_SOCKET="(cfg.socketPath)"
           # if [[ -S "$ONEWORD_SOCKET" ]]; then
           #   export SSH_AUTH_SOCK="$ONEWORD_SOCKET"
           # fi
