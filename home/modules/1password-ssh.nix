@@ -20,8 +20,12 @@
     curl     # For downloading npiperelay
   ];
 
-  # Create directory for profile.d scripts
-  home.file.".profile.d/.keep".text = "";
+  home.file = {
+    # Create directory for profile.d scripts
+    ".profile.d/.keep".text = "";
+    # Create bin directory
+    "bin/.keep".text = "";
+  };
 
   # Add shell integration to load all profile.d scripts
   programs.bash.initExtra = ''
@@ -35,7 +39,4 @@
       unset script
     fi
   '';
-
-  # Create test scripts in bin directory
-  home.file."bin/.keep".text = "";
 }
