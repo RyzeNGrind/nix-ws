@@ -44,14 +44,14 @@
   # Desktop Environment (GNOME)
   # ----------------------------------------------------------------------------
   services.xserver.enable = true;
-  services.xserver.displayManager.gdm.enable = true;
+  services.displayManager.gdm.enable = true;
   services.xserver.desktopManager.gnome.enable = true;
   services.xserver.xkb = { layout = "us"; variant = ""; options = "ctrl:swapcaps"; }; # Keyboard layout
   console.useXkbConfig = true; # Apply XKB settings to TTY console
 
   # Automatic login for GNOME
-  services.xserver.displayManager.autoLogin.enable = true;
-  services.xserver.displayManager.autoLogin.user = "ryzengrind";
+  services.displayManager.autoLogin.enable = true;
+  services.displayManager.autoLogin.user = "ryzengrind";
   # Workaround for GNOME autologin issues with getty/autovt
   systemd.services."getty@tty1".enable = false;
   systemd.services."autovt@tty1".enable = false;
