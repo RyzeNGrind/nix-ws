@@ -23,7 +23,7 @@ if [ -n "$TEST_NAME" ]; then
   nix flake check --keep-going --option timeout $TIMEOUT --print-build-logs \
     --override-input self "$PROJECT_ROOT" \
     --no-update-lock-file \
-    --checks "$SPECIFIC_CHECK" \
+    -A "checks.$(nix eval --impure --expr builtins.currentSystem --raw).$SPECIFIC_CHECK" \
     "$PROJECT_ROOT"
 else
   # List available VM tests
