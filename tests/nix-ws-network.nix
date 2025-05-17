@@ -1,4 +1,4 @@
-{ self, self', pkgs, lib ? pkgs.lib, ... }:
+{ self', pkgs, lib ? pkgs.lib, ... }:
 
 pkgs.nixosTest {
   name = "nix-ws-network";
