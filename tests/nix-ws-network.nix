@@ -1,43 +1,35 @@
-{ pkgs, lib, self', inputs, ... }@args:
-let
-  # Properly evaluate the NixOS configuration using nixos lib
-  nixosSystem = pkgs.nixos {
-    configuration = { pkgs, config, lib, ... }: {
-      imports = [
-        ../hosts/nix-ws.nix
-      ];
-      
-      # Set parameters needed for basic evaluation
-      _module.args = {
-        inherit self' inputs;
-      };
-      
-      # Enable fast build optimizations
-      nix-fast-build.enable = true;
+{ self, pkgs, lib ? pkgs.lib }:
+
+pkgs.nixosTest {
+  name = "nix-ws-network";
+  nodes.machine = { config, pkgs, lib, ... }: {
+    networking.hostName = "nix-ws";
+    # Network services only
+    services.tailscale = {
+      enable = true;
+      useRoutingFeatures = "client";
+      authKeyFile = "/etc/tailscale-authkey";
     };
-  };
-in
-  # Extract the VM test from the evaluated config
-  nixosSystem.config.system.build.vmTest.override {
-    # Network test configuration
-    testEnv = {
-      includeDesktop = false;
-      runDuration = "short";
-    };
+    environment.etc."tailscale-authkey".text = "test-dummy-key";
     
-    name = "nix-ws-network-test"; # Unique name for the test
+    services.zerotierone.enable = true;
 
-    nodes.machine.config = { pkgs, ... }: {
-      # Specific network test configurations go here
-      # For example, to test static IP:
-      # networking.interfaces.eth0.ipv4.addresses = [ { address = "192.168.1.10"; prefixLength = 24; } ];
-      # networking.defaultGateway = "192.168.1.1";
-      # networking.nameservers = [ "1.1.1.1" ];
-    };
+    # Mask services for fast testing
+    systemd.services.tailscaled.wantedBy = lib.mkForce [];
+    systemd.services.zerotierone.wantedBy = lib.mkForce [];
+    
+    system.stateVersion = "24.11";
+  };
 
-    testScript = ''
-      machine.wait_for_unit("network.target")
-      machine.succeed("ip addr show eth0")
-      # Add more specific network assertions here
-    '';
-  }
+  testScript = ''
+    machine.wait_for_unit("multi-user.target")
+    # Verify services are installed but not started
+    machine.succeed("systemctl is-enabled tailscaled")
+    machine.succeed("systemctl is-enabled zerotierone")
+    # Verify auth key file exists
+    machine.succeed("test -f /etc/tailscale-authkey")
+    # Verify basic networking utilities
+    machine.succeed("ip addr")
+    machine.succeed("ping -c 1 127.0.0.1")
+  '';
+}

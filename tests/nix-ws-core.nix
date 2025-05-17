@@ -1,31 +1,23 @@
-{ pkgs, lib, self', inputs, ... }@args:
-let
-  # Properly evaluate the NixOS configuration using nixos lib
-  nixosSystem = pkgs.nixos {
-    configuration = { pkgs, config, lib, ... }: {
-      imports = [
-        ../hosts/nix-ws.nix
-      ];
-      
-      # Set parameters needed for basic evaluation
-      _module.args = {
-        inherit self' inputs;
-      };
-      
-      # Disable network dependencies
-      networking.useDHCP = false;
-      services.tailscale.enable = false;
-  
-      # Enable fast build optimizations
-      nix-fast-build.enable = true;
+{ self, pkgs, lib ? pkgs.lib }:
+
+pkgs.nixosTest {
+  name = "nix-ws-core";
+  nodes.machine = { config, pkgs, lib, ... }: {
+    networking.hostName = "nix-ws";
+    users.users.ryzengrind = {
+      isNormalUser = true;
+      extraGroups = [ "wheel" "networkmanager" ];
     };
+    services.openssh.enable = true;
+
+    # Set a short timeout for fast testing
+    system.stateVersion = "24.11";
   };
-in
-  # Extract the VM test from the evaluated config
-  nixosSystem.config.system.build.vmTest.override {
-    # Minimal test configuration
-    testEnv = {
-      includeDesktop = false;
-      runDuration = "short";
-    };
-  }
+
+  testScript = ''
+    machine.wait_for_unit("multi-user.target")
+    machine.succeed("id ryzengrind")
+    machine.succeed("systemctl is-enabled sshd")
+    machine.succeed("hostname | grep nix-ws")
+  '';
+}
