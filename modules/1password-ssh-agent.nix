@@ -51,7 +51,7 @@ options.services.onepassword-ssh-agent = {
       default = true;
       description = "Whether to set the SSH_AUTH_SOCK environment variable in shell profile";
     };
-  };
+  }; # End of options block
 
   config = mkIf cfg.enable {
     # Install required dependencies
