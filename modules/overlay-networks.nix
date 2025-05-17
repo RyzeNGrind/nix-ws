@@ -27,28 +27,19 @@
       extraUpFlags = lib.mkIf (lib.hasAttr "age" config) [ "--authkey=$(cat /run/agenix/tailscale-authkey)" ];
     };
 
-    # Cloudflare One (cloudflared) configuration
+    # Cloudflare One (cloudflared) configuration - with required default service
     services.cloudflared = {
       enable = true;
+      # Use the tunnel ID as obtained from `cloudflared tunnel list`
       tunnels = lib.mkIf (lib.hasAttr "age" config) {
-        "YOUR_TUNNEL_ID" = {
+        "6d2d34a6-c981-4d1b-9710-05d3d79aca84" = {
+          # Required configuration attributes
           credentialsFile = "/run/agenix/cloudflared-tunnel.json";
-          configFile = "/etc/cloudflared/config.yml";
+          # Default service setting is required by the module
+          default = "http_status:404";
         };
       };
-    };
-
-    # Cloudflared configuration file
-    environment.etc = lib.mkIf (lib.hasAttr "age" config) {
-      "cloudflared/config.yml".text = ''
-        tunnel: YOUR_TUNNEL_ID
-        credentials-file: /run/agenix/cloudflared-tunnel.json
-        protocol: quic
-        warp-routing:
-          enabled: true
-        logfile: /var/log/cloudflared.log
-        loglevel: info
-      '';
+      # No additional settings to avoid incompatibilities with the custom module
     };
     
     # Define the age secrets with a low priority (only if age is available)

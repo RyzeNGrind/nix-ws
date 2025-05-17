@@ -101,7 +101,8 @@ in
 
   # Add root user keys from user config
   users.users.root = {
-    password = userConfig.initialPassword;
+    # Password is now managed in flake.nix to avoid conflicts
+    # We only manage SSH keys here
     openssh.authorizedKeys.keys = userConfig.authorizedKeys;
   };
 

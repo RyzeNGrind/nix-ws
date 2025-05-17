@@ -11,6 +11,32 @@
         "-c",
         "export MCPR_TOKEN='mcpr_y3uOMhJ90dxOElA27o23a5BKb_W5-jxC'; export NIX_CONNECT_TIMEOUT=15; export NIXPKGS_ALLOW_UNFREE=1; export NIXPKGS_ALLOW_INSECURE=1; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y mcpr-cli@latest connect'"
       ]
+    },
+    "taskmaster-ai": {
+      "command": "wsl",
+      "args": [
+        "-d",
+        "NixOS",
+        "-u",
+        "ryzengrind",
+        "/bin/bash",
+        "-c",
+        "export ANTHROPIC_API_KEY='YOUR_ANTHROPIC_API_KEY_HERE'; export PERPLEXITY_API_KEY='YOUR_PERPLEXITY_API_KEY_HERE'; export MODEL='claude-3-7-sonnet-20250219'; export PERPLEXITY_MODEL='sonar-pro'; export MAX_TOKENS=64000; export TEMPERATURE=0.2; export DEFAULT_SUBTASKS=5; export DEFAULT_PRIORITY='medium'; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y --package=task-master-ai task-master-ai'"
+      ],
+      "alwaysAllow": []
+    },
+    "deebo": {
+      "command": "wsl",
+      "args": [
+        "-d",
+        "NixOS",
+        "-u",
+        "ryzengrind",
+        "/bin/bash",
+        "-c",
+        "export NODE_ENV='development'; export USE_MEMORY_BANK='true'; export MOTHER_HOST='openrouter'; export MOTHER_MODEL='anthropic/claude-3.5-sonnet'; export SCENARIO_HOST='openrouter'; export SCENARIO_MODEL='deepseek/deepseek-chat'; export OPENROUTER_API_KEY='your-openrouter-api-key'; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y deebo-setup@latest'"
+      ],
+      "alwaysAllow": []
     }
   }
 }

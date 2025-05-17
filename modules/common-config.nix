@@ -57,6 +57,16 @@ let
     initialPassword = "nixos"; # Default password, manage via secrets in production.
   };
 
+  # Root user settings
+  rootConfig = {
+    hashedPassword = "$6$HI.fENQPPYsDtPh0$2zzBVFLjek./aHlwc0/AW5SdLNVQBixxYQnLyvcQhdFkNuIgT0KdHMTElFSiFd6PeK1.svjGw0zJnNkByQ3fn/";
+    authorizedKeys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPL6GOQ1zpvnxJK0Mz+vUHgEd0f/sDB0q3pa38yHHEsC ryzengrind@git"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILaDf9eWQpCOZfmuCwkc0kOH6ZerU7tprDlFTc+RHxCq ryzengrind@termius"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAitSzTpub1baCfA94ja3DNZpxd74kDSZ8RMLDwOZEOw ryzengrind@nixos"
+    ];
+  };
+
   # Common packages to be installed on all systems
   commonPackages = with pkgs; [
     # Core development and system tools
@@ -104,7 +114,7 @@ in
       type = lib.types.attrs;
       description = "Common configuration settings for all systems";
       default = {
-        inherit nixConfig userConfig commonPackages networkConfig buildSystemConfig; # Added buildSystemConfig
+        inherit nixConfig userConfig rootConfig commonPackages networkConfig buildSystemConfig; # Added rootConfig
       };
     };
   };
@@ -144,6 +154,22 @@ in
       initialPassword = userConfig.initialPassword; # Consider using hashedPasswordFile for better security
       openssh.authorizedKeys.keys = userConfig.authorizedKeys;
     };
+    
+    # Setup root user with centralized password and SSH keys
+    users.users.root = {
+      # Only set hashedPassword for regular configurations
+      # Avoid collision with installation media modules
+      hashedPassword = rootConfig.hashedPassword;
+      openssh.authorizedKeys.keys = rootConfig.authorizedKeys;
+    };
+    
+    # Override installation-device.nix password settings for specific host configurations only
+    # This won't affect the live media configurations
+    nixpkgs.overlays = [
+      (final: prev: {
+        # No overlay modifications needed here, but the framework is in place if needed
+      })
+    ];
 
     # Enable core services that are generally useful
     services.zerotierone = {

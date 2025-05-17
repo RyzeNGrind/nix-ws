@@ -5,6 +5,7 @@
   vscode-generic-fn,
   fetchurl,
   nixosTests,
+  fetchFromGitHub,
   commandLineArgs ? "",
   useVSCodeRipgrep ? stdenv.isDarwin,
 }:
@@ -12,6 +13,9 @@
 let
   pname = "void-editor";
   version = "1.99.30001";
+  
+  # Import shell integration scripts module
+  shellIntegration = callPackage ./shell-integration { inherit lib fetchFromGitHub; };
 
   inherit (stdenv.hostPlatform) system;
 
@@ -65,6 +69,16 @@ in
   executableName = "void";
   longName = "Void Editor";
   shortName = "void";
+  libraryName = "void-editor";
+  
+  # Add shell integration scripts
+  shellIntegrationPath = "resources/app/shell-integration";
+  
+  # Add a postInstall hook to actually copy the shell integration scripts
+  postInstallScript = ''
+    # Install shell integration scripts
+    ${shellIntegration.installShellIntegrationScripts "$out/lib/${libraryName}/${shellIntegrationPath}"}
+  '';
 
   src = sources.${system} or throwSystem;
 

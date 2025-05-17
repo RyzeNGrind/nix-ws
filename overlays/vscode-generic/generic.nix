@@ -48,6 +48,9 @@
   updateScript,
   dontFixup ? false,
   rev ? null,
+  shellIntegrationPath ? null,
+  postInstall ? null,
+  postInstallScript ? null,
   vscodeServer ? null,
   sourceExecutableName ? executableName,
   useVSCodeRipgrep ? false,
@@ -245,6 +248,11 @@ stdenv.mkDerivation (
             mkdir -p "$out/Applications/${longName}.app" "$out/bin"
             cp -r ./* "$out/Applications/${longName}.app"
             ln -s "$out/Applications/${longName}.app/Contents/Resources/app/bin/${sourceExecutableName}" "$out/bin/${executableName}"
+            
+            # Install shell integration scripts if defined
+            if [ -n "''${shellIntegrationPath-}" ]; then
+              mkdir -p "$out/Applications/${longName}.app/Contents/Resources/app/${shellIntegrationPath}"
+            fi
           ''
         else
           ''
@@ -252,6 +260,11 @@ stdenv.mkDerivation (
             cp -r ./* "$out/lib/${libraryName}"
 
             ln -s "$out/lib/${libraryName}/bin/${sourceExecutableName}" "$out/bin/${executableName}"
+            
+            # Install shell integration scripts if defined
+            if [ -n "''${shellIntegrationPath-}" ]; then
+              mkdir -p "$out/lib/${libraryName}/${shellIntegrationPath}"
+            fi
 
             # These are named vscode.png, vscode-insiders.png, etc to match the name in upstream *.deb packages.
             mkdir -p "$out/share/pixmaps"
@@ -269,6 +282,11 @@ stdenv.mkDerivation (
       )
       + ''
         runHook postInstall
+        
+        # Run custom postInstall if defined
+        if [ -n "''${postInstallScript-}" ]; then
+          $postInstallScript
+        fi
       '';
 
     preFixup = ''

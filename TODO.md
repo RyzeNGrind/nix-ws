@@ -75,8 +75,12 @@ Address:	127.0.0.1:53
 - an app to automate and stick to your profitable trading plan and share with friends, use A2A to have them leverage [fraction.ai $FRAC](https://fraction-ai.gitbook.io/docs-v1)
 
 - Stack: web3 interface, consider connecting to oracles like tradekeep.io private and public data sources. Users can provide custom ingests but all ingests and data should go through verification and sanitation to ensure agent quality improves over time but doesnt get creatively hindered in its own process or method.
+  - Consider integration with [fractionai.xyz](fractionai.xyz) for agent automation on web3 and reward pooling.
 
-> **trading plan**: only enter trades on 100K, 200K after ensuring MTA(Multi-Timeframe Analysis{1D>4H>1H>15m>5m>1m}) gives us higher TF direction and price action meets 3 strict criteria {C1,C2,C3}.  
+## **trading plan**: only enter trades on 100K, 200K after ensuring MTA(Multi-Timeframe Analysis{1D>4H>1H>15m>5m>1m}) gives us higher TF direction and price action meets 3 strict criteria {C1,C2,C3}.
+
+> Proof of Marked up TradingView Chart with Criterias:{C1:C3}=Proof of Permission to enter trade on account(live/paper demo). 
+### *risk management*:  
 
 # - __documentation philosophy__:**[Priority:Highest]**
   - implement [_`kattelhasen`_](https://srid.ca/zettelkasten) style site markdown for structured knowledge linking and retrieval
