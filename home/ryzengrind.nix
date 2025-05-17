@@ -3,28 +3,32 @@ let
   # Access flake inputs via the 'inputs' argument passed from extraSpecialArgs
   std = inputs.std or null;
   hive = inputs.hive or null;
-  current_devmods = inputs.devmods or null; # Renamed to avoid conflict if 'devmods' is an option set
+  current_devmods = inputs.devmods or null;
   current_flakelight = inputs.flakelight or null;
 
-  # Import the common-config module for access to the settings
-  # Ensure common-config.nix can handle being imported this way, or adjust its signature/usage
-  commonModule = import ../modules/common-config.nix {
-    lib = inputs.nixpkgs.lib; # Use nixpkgs.lib explicitly
-    config = {}; # Passing an empty config here might still be an issue if common-config expects more
-    pkgs = inputs.nixpkgs.legacyPackages.${builtins.currentSystem};
-  };
-  
-  # Extract the user configuration
-  userConfig = commonModule.config.commonConfig.userConfig;
+  # commonModule is no longer imported manually here; it's added to imports.
+  # Values from common-config will be accessed via the 'config' argument.
 in
 {
-  # Use the common user settings
-  home.username = userConfig.name;
-  home.homeDirectory = userConfig.homeDirectory;
-  home.stateVersion = commonModule.config.commonConfig.nixConfig.stateVersion;
+  # Values from common-config.nix are accessed via the 'config' argument
+  # once common-config.nix is correctly imported.
+  # common-config.nix defines options.commonConfig.userConfig.name etc.
+  # and sets config.commonConfig.userConfig.name etc. in its own 'config' block.
+  # However, common-config.nix directly sets users.users.ryzengrind.name etc.
+  # So, we might not need to reference config.commonConfig here if common-config already sets these.
+  # Let's assume common-config sets these directly for now, or they are options.
+  # For safety, we'll assume common-config makes its values available under config.commonConfig.
+  home.username = config.commonConfig.userConfig.name;
+  home.homeDirectory = config.commonConfig.userConfig.homeDirectory;
+  home.stateVersion = config.commonConfig.nixConfig.stateVersion; # This was defined in common-config's let block,
+                                                              # but used to set system.stateVersion.
+                                                              # For HM's stateVersion, it should be set directly or from an option.
+                                                              # common-config sets system.stateVersion, not home.stateVersion.
+                                                              # We'll use the one from common-config's nixConfig let binding for now.
   programs.home-manager.enable = true;
 
   imports = lib.filter (x: x != null) [ # Use lib.filter to remove nulls if inputs are missing
+    ../modules/common-config.nix # Import common-config as a module
     (if std != null && std ? homeModules && std.homeModules ? default then std.homeModules.default else null)
     (if hive != null && hive ? homeModules && hive.homeModules ? default then hive.homeModules.default else null)
     (if current_devmods != null && current_devmods ? homeModules && current_devmods.homeModules ? default then current_devmods.homeModules.default else null)
