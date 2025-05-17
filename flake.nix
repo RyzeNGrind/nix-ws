@@ -2,7 +2,7 @@
   description = "NixOS and Home Manager configurations for the entire cluster";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05"; // Align with home-manager release-24.05
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.05";
     void-fork.url = "github:jskrzypek/nixpkgs/void-editor";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
