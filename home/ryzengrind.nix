@@ -4,7 +4,7 @@
   # Basic required settings from common-config
   home.username = config.commonConfig.userConfig.name;
   home.homeDirectory = config.commonConfig.userConfig.homeDirectory;
-  home.stateVersion = config.commonConfig.nixConfig.stateVersion; # Should be "24.05" via common-config if it uses the let binding
+  # home.stateVersion is set explicitly below to "24.05"
 
   programs.home-manager.enable = true;
   home.enableNixpkgsReleaseCheck = false; # Disable HM/Nixpkgs version mismatch warning
