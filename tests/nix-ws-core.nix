@@ -1,17 +1,31 @@
-{ pkgs, self', inputs, ... }@args: # Added 'inputs'
+{ pkgs, lib, self', inputs, ... }@args:
 let
-  baseConfig = import ../hosts/nix-ws.nix;
-in (baseConfig args).config.system.build.vmTest.override {
-  # Disable network dependencies
-  networking.useDHCP = false;
-  services.tailscale.enable = false;
+  # Properly evaluate the NixOS configuration using nixos lib
+  nixosSystem = pkgs.nixos {
+    configuration = { pkgs, config, lib, ... }: {
+      imports = [
+        ../hosts/nix-ws.nix
+      ];
+      
+      # Set parameters needed for basic evaluation
+      _module.args = {
+        inherit self' inputs;
+      };
+      
+      # Disable network dependencies
+      networking.useDHCP = false;
+      services.tailscale.enable = false;
   
-  # Enable fast build optimizations
-  nix-fast-build.enable = true;
-  
-  # Minimal test configuration
-  testEnv = {
-    includeDesktop = false;
-    runDuration = "short";
+      # Enable fast build optimizations
+      nix-fast-build.enable = true;
+    };
   };
-}
+in
+  # Extract the VM test from the evaluated config
+  nixosSystem.config.system.build.vmTest.override {
+    # Minimal test configuration
+    testEnv = {
+      includeDesktop = false;
+      runDuration = "short";
+    };
+  }
