@@ -29,25 +29,25 @@ options.services.onepassword-ssh-agent = {
   enable = mkEnableOption "1Password SSH agent integration";
 
     socketPath = mkOption {
-      type = types.str;
+      type = lib.types.str; # Corrected: use lib.types
       default = "${config.home.homeDirectory}/.1password/agent.sock";
       description = "Path to the 1Password SSH agent socket";
     };
 
     windowsPipeName = mkOption {
-      type = types.str;
+      type = lib.types.str; # Corrected: use lib.types
       default = "//./pipe/com.1password.1password.ssh";
       description = "Windows named pipe for the 1Password SSH agent";
     };
 
     autoStartAgent = mkOption {
-      type = types.bool;
+      type = lib.types.bool; # Corrected: use lib.types
       default = true;
       description = "Whether to automatically start the SSH agent bridge on login";
     };
 
     setEnvironmentVariable = mkOption {
-      type = types.bool;
+      type = lib.types.bool; # Corrected: use lib.types
       default = true;
       description = "Whether to set the SSH_AUTH_SOCK environment variable in shell profile";
     };
