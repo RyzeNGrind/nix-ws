@@ -14,11 +14,14 @@
   };
 
   # Ensure required packages are installed
-  home.packages = with pkgs; [
-    socat    # For socket relay
-    unzip    # For unpacking npiperelay
-    curl     # For downloading npiperelay
-  ];
+  # home.packages are mostly handled by the agent module itself if needed for its scripts.
+  # socat is listed in modules/1password-ssh-agent.nix.
+  # unzip and curl are not needed if npiperelay is fetched by Nix.
+  # home.packages = with pkgs; [
+  #   socat    # For socket relay
+  #   unzip    # For unpacking npiperelay
+  #   curl     # For downloading npiperelay
+  # ];
 
   home.file = {
     # Create directory for profile.d scripts
@@ -28,15 +31,16 @@
   };
 
   # Add shell integration to load all profile.d scripts
-  programs.bash.initExtra = ''
-    # Load all scripts from ~/.profile.d
-    if [ -d "$HOME/.profile.d" ]; then
-      for script in "$HOME/.profile.d/"*.sh; do
-        if [ -r "$script" ]; then
-          . "$script"
-        fi
-      done
-      unset script
-    fi
-  '';
+  # Temporarily remove bash.initExtra to simplify further
+  # programs.bash.initExtra = ''
+  #   # Load all scripts from ~/.profile.d
+  #   if [ -d "$HOME/.profile.d" ]; then
+  #     for script in "$HOME/.profile.d/"*.sh; do
+  #       if [ -r "$script" ]; then
+  #         . "$script"
+  #       fi
+  #     done
+  #     unset script
+  #   fi
+  # '';
 }
