@@ -24,17 +24,28 @@ trap "rm -f $TMP_NIX" EXIT
 
 cat > "$TMP_NIX" <<EOF
 let
-  # Get absolute paths
-  projectRoot = "$PROJECT_ROOT";
-  testFile = "$PROJECT_ROOT/tests/${TEST_NAME}.nix";
-
   # Import nixpkgs
-  pkgs = import <nixpkgs> {};
+  nixpkgs = builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+    sha256 = "0000000000000000000000000000000000000000000000000000"; # This will fail and Nix will suggest the correct hash
+  };
   
-  # Run a specific test directly
-  test = import testFile;
+  # Get flake inputs using builtins.getFlake
+  flake = builtins.getFlake "path:$PROJECT_ROOT";
+  
+  # Import the test file with all required parameters
+  testModule = import "$PROJECT_ROOT/tests/${TEST_NAME}.nix" {
+    pkgs = import nixpkgs {};
+    lib = (import nixpkgs {}).lib;
+    self' = flake.outputs.packages.\${builtins.currentSystem};
+    inputs = flake.inputs;
+    # Additional parameters that may be needed
+    environment.noTailscale = true;
+    nix-fast-build.enable = true;
+    config = {};
+  };
 in
-  test
+  testModule
 EOF
 
 # For debugging
@@ -45,7 +56,7 @@ echo
 
 # Run the test with specified timeout
 echo "Starting test with timeout of $TIMEOUT seconds..."
-nix-build --timeout $TIMEOUT "$TMP_NIX"
+NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build --timeout $TIMEOUT "$TMP_NIX" --show-trace
 
 echo
 echo "Test $TEST_NAME completed successfully!"
