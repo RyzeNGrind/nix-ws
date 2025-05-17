@@ -36,7 +36,8 @@
         "-c",
         "export NODE_ENV='development'; export USE_MEMORY_BANK='true'; export MOTHER_HOST='openrouter'; export MOTHER_MODEL='anthropic/claude-3.5-sonnet'; export SCENARIO_HOST='openrouter'; export SCENARIO_MODEL='deepseek/deepseek-chat'; export OPENROUTER_API_KEY='your-openrouter-api-key'; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y deebo-setup@latest'"
       ],
-      "alwaysAllow": []
+      "alwaysAllow": [],
+      "disabled": true
     }
   }
 }

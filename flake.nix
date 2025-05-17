@@ -313,15 +313,25 @@
       };
 
       # Common modules for NixOS configurations
-      nixosModules.common = { ... }: {
+      nixosModules.common = { config, ... }: {
         imports = [
           ./modules/common-config.nix
           ./modules/build-system.nix
           ./modules/fast-build.nix
-          inputs.nix-cloudflared.nixosModules.default # Or .cloudflared if 'default' is not the one
+          inputs.nix-cloudflared.nixosModules.default
+          inputs.sops-nix.nixosModules.sops  # Import sops-nix module
+          inputs.agenix.nixosModules.default # Import agenix module
+          inputs.opnix.nixosModules.opnix    # Import opnix for 1Password integration
         ];
         nixpkgs.config.allowUnfree = true;
         nix.settings.experimental-features = [ "nix-command" "flakes" ];
+        
+        # Common opnix configuration (optional defaults)
+        op.settings = {
+          enable = config.services.mcp-secrets.enable or false;
+          # Allow referencing 1Password secrets in Nix
+          # Will be activated only if mcp-secrets is enabled
+        };
       };
 
       # NixOS configurations

@@ -1,62 +1,45 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Script to run a single NixOS VM test without using flake checks
-# This approach avoids the long build times of running all tests at once
+# Run a single NixOS VM test with configurable timeout
+# Usage: ./scripts/run-single-test.sh [test_name] [timeout_seconds]
+# Example: ./scripts/run-single-test.sh nix-ws-core 60
 
-# Get the absolute path to the project directory
+TEST_NAME=${1:?"Please provide a test name (core, network, gui, integration)"}
+TIMEOUT=${2:-30}  # Default timeout: 30 seconds for most tests
+
+# Get project root directory
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-
-# Get the test name from the first argument, or use a default
-TEST_NAME=${1:-nix-ws-core}
-
-# Set timeout (default to 5 minutes)
-TIMEOUT=${TIMEOUT:-300}
-
-echo "Running test: $TEST_NAME"
-echo "Timeout: $TIMEOUT seconds"
 echo "Project root: $PROJECT_ROOT"
-echo
 
-# Create a test file directly in the project directory (to avoid path issues)
-TMP_NIX="$PROJECT_ROOT/tmp-test-runner.nix"
-trap "rm -f $TMP_NIX" EXIT
+# Full test name
+FULL_TEST_NAME="nix-ws-$TEST_NAME"
+TEST_FILE="$PROJECT_ROOT/tests/$FULL_TEST_NAME.nix"
 
-cat > "$TMP_NIX" <<EOF
-let
-  # Import nixpkgs
-  nixpkgs = builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-    sha256 = "0mmcni35fxs87fnhavfprspczgnnkxyizy8a4x57y98y76c4q4da"; # Hash from previous run
-  };
-  
-  # Get flake inputs using builtins.getFlake
-  flake = builtins.getFlake "path:$PROJECT_ROOT";
-  
-  # Import the test file with all required parameters
-  testModule = import "$PROJECT_ROOT/tests/${TEST_NAME}.nix" {
-    pkgs = import nixpkgs {};
-    lib = (import nixpkgs {}).lib;
-    self' = flake.outputs.packages.\${builtins.currentSystem};
-    inputs = flake.inputs;
-    # Additional parameters that may be needed
-    environment.noTailscale = true;
-    nix-fast-build.enable = true;
-    config = {};
-  };
-in
-  testModule
-EOF
+# Check if test file exists
+if [ ! -f "$TEST_FILE" ]; then
+    echo "ERROR: Test file not found: $TEST_FILE"
+    echo "Available tests:"
+    find "$PROJECT_ROOT/tests" -name "nix-ws-*.nix" -type f | sort | sed "s|$PROJECT_ROOT/tests/nix-ws-||" | sed "s|\.nix$||"
+    exit 1
+fi
 
-# For debugging
-echo "Created test runner at: $TMP_NIX"
-echo "Contents:"
-cat "$TMP_NIX"
-echo
+echo "Running test: $FULL_TEST_NAME"
+echo "Timeout: $TIMEOUT seconds"
+echo "Test file: $TEST_FILE"
 
-# Run the test with specified timeout
-echo "Starting test with timeout of $TIMEOUT seconds..."
-NIXPKGS_ALLOW_UNSUPPORTED_SYSTEM=1 nix-build --timeout $TIMEOUT "$TMP_NIX" --show-trace
+# Build using flake syntax directly - using checks namespace
+SYSTEM=$(nix eval --impure --expr builtins.currentSystem --raw)
+echo "System architecture: $SYSTEM"
+
+# Use nix build with flake reference - target the check directly
+cd "$PROJECT_ROOT"
+NIXPKGS_ALLOW_UNFREE=1 nix build \
+  ".#checks.$SYSTEM.vm-test-run-$FULL_TEST_NAME" \
+  --option timeout $TIMEOUT \
+  --print-build-logs \
+  --no-link \
+  --show-trace
 
 echo
-echo "Test $TEST_NAME completed successfully!"
+echo "Test completed successfully!"
