@@ -1,15 +1,22 @@
-{ pkgs, ... }: # Simplest possible Home Manager module signature
+{ config, pkgs, lib, inputs, ... }: # Standard Home Manager module arguments
 
 {
-  home.username = "ryzengrind";
-  home.homeDirectory = "/home/ryzengrind";
-  home.stateVersion = "24.05"; # Must match your Home Manager version
+  # Basic required settings from common-config
+  home.username = config.commonConfig.userConfig.name;
+  home.homeDirectory = config.commonConfig.userConfig.homeDirectory;
+  home.stateVersion = "24.05"; # Explicitly "24.05" to match home-manager release-24.05
 
   programs.home-manager.enable = true;
+  home.enableNixpkgsReleaseCheck = false; # Disable HM/Nixpkgs version mismatch warning
 
-  # Add a single, simple package to ensure something is happening
-  home.packages = [ pkgs.hello ];
+  imports = [
+    ../modules/common-config.nix # For common user settings
+    ./modules/1password-ssh.nix  # For 1Password SSH agent functionality
 
-  # All other configurations and imports are removed for this test.
-  imports = [];
+    # External flake modules remain commented out for further stability/debugging if needed
+    # (if (inputs.std or null) != null && inputs.std ? homeModules && inputs.std.homeModules ? default then inputs.std.homeModules.default else null)
+    # (if (inputs.hive or null) != null && inputs.hive ? homeModules && inputs.hive.homeModules ? default then inputs.hive.homeModules.default else null)
+    # (if (inputs.devmods or null) != null && inputs.devmods ? homeModules && inputs.devmods.homeModules ? default then inputs.devmods.homeModules.default else null)
+    # (if (inputs.flakelight or null) != null && inputs.flakelight ? homeModules && inputs.flakelight.homeModules ? default then inputs.flakelight.homeModules.default else null)
+  ];
 }
