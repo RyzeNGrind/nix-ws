@@ -4,7 +4,7 @@
   # Basic required settings
   home.username = "ryzengrind";
   home.homeDirectory = "/home/ryzengrind";
-  home.stateVersion = "24.11"; # Set to your target state version
+  home.stateVersion = "24.05"; # Align with home-manager release-24.05
 
   programs.home-manager.enable = true;
 
