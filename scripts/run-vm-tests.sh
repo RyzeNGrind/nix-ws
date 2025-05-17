@@ -18,13 +18,21 @@ if [ -n "$TEST_NAME" ]; then
   echo "Running VM test: $TEST_NAME"
   echo "Timeout: $TIMEOUT seconds"
   
-  # Run the specific test using nix flake check
+  # Run the specific test using nix build (more reliable than nix flake check)
   SPECIFIC_CHECK="vm-test-run-$TEST_NAME"
-  nix flake check --keep-going --option timeout $TIMEOUT --print-build-logs \
+  SYSTEM=$(nix eval --impure --expr builtins.currentSystem --raw)
+  echo "System architecture: $SYSTEM"
+  echo "Building check: $SPECIFIC_CHECK"
+  
+  # Build the specific check directly
+  nix build \
+    --keep-going \
+    --option timeout $TIMEOUT \
+    --print-build-logs \
+    --no-link \
     --override-input self "$PROJECT_ROOT" \
     --no-update-lock-file \
-    -A "checks.$(nix eval --impure --expr builtins.currentSystem --raw).$SPECIFIC_CHECK" \
-    "$PROJECT_ROOT"
+    "$PROJECT_ROOT#checks.$SYSTEM.$SPECIFIC_CHECK"
 else
   # List available VM tests
   echo "Available VM tests:"
