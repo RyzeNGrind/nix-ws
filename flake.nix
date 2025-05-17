@@ -147,6 +147,7 @@
             inherit self' pkgs;
             lib = pkgs.lib; # Explicitly provide lib
             inputs = inputs'; # Map perSystem's inputs' to inputs expected by the test
+            config = {}; # Provide an empty config object
             # Pass a minimal config directly for this test
             nix-fast-build.enable = true;
             environment.noTailscale = true;
