@@ -9,8 +9,8 @@ let
   # Import the common-config module for access to the settings
   # Ensure common-config.nix can handle being imported this way, or adjust its signature/usage
   commonModule = import ../modules/common-config.nix {
-    inherit (inputs) lib;
-    config = {};
+    lib = inputs.nixpkgs.lib; # Use nixpkgs.lib explicitly
+    config = {}; # Passing an empty config here might still be an issue if common-config expects more
     pkgs = inputs.nixpkgs.legacyPackages.${builtins.currentSystem};
   };
   
