@@ -88,8 +88,11 @@ if [ ! -f "$NPIPERELAY_PATH" ] || [ ! -x "$NPIPERELAY_PATH" ]; then
 fi
 
 # Check if the pipe exists on the Windows side
-if ! ls -la /mnt/c/Windows/System32/OpenSSH/ssh-agent.exe >/dev/null 2>&1; then
-  echo "Warning: OpenSSH agent may not be installed on Windows."
+# Use a more resilient method that doesn't require wslpath
+if [ -e "/mnt/c/Windows/System32/OpenSSH/ssh-agent.exe" ] || [ -e "/mnt/c/Program Files/OpenSSH/ssh-agent.exe" ]; then
+  echo -e "${GREEN}✓ Windows OpenSSH agent appears to be installed${NC}"
+else
+  echo -e "${YELLOW}Warning: OpenSSH agent may not be installed on Windows.${NC}"
   echo "Please ensure OpenSSH Client is installed via Windows Settings > Apps > Optional features."
 fi
 

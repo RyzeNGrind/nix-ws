@@ -112,7 +112,9 @@
         devShells.default = pkgs.mkShell {
           name = "nix-cfg-mgmt-shell";
           packages = with pkgs; [
-            git gh pre-commit alejandra statix deadnix sops wslu # Added wslu for wslpath
+            git gh pre-commit alejandra statix deadnix sops
+            socat unzip curl      # For 1Password SSH agent integration
+            wslu                  # For WSL utilities like wslpath
             generate-hardware-config-pkg # Use let-bound variable
             inputs.nix-fast-build.packages.${system}.default
             # inputs.nix-eval-jobs.packages.${system}.default # Temporarily commented out due to incompatibility
@@ -148,72 +150,52 @@
 
           # Explicitly define each test as a separate check for individual execution
           "vm-test-run-nix-ws-core" = pkgs.callPackage ./tests/nix-ws-core.nix {
+            # Pass self' directly as it's the expected parameter name
             inherit self' pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
 
           "vm-test-run-nix-ws-network" = pkgs.callPackage ./tests/nix-ws-network.nix {
+            # Pass self' directly as it's the expected parameter name
             inherit self' pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
 
           "vm-test-run-nix-ws-gui" = pkgs.callPackage ./tests/nix-ws-gui.nix {
+            # Pass self' directly as it's the expected parameter name
             inherit self' pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
 
           "vm-test-run-nix-ws-e2e" = pkgs.callPackage ./tests/nix-ws-e2e.nix {
-            inherit self' pkgs;
-            lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
+            # Only pass the exact arguments expected by the test function
+            self = self';
+            inherit pkgs;
+            agenix = inputs.agenix;
+            opnix = if (inputs ? opnix) then inputs.opnix else null;
           };
 
           "vm-test-run-nix-ws-min" = pkgs.callPackage ./tests/nix-ws-min.nix {
-            inherit self' pkgs;
+            # Use self correctly as the test expects it
+            inherit self pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
 
           "vm-test-run-nix-ws-integration" = pkgs.callPackage ./tests/nix-ws-integration.nix {
+            # Pass self' directly as it's the expected parameter name
             inherit self' pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
           
           # Ultra-minimal test for fast boot and basic functionality checks
           "vm-test-run-nix-ws-minimal" = pkgs.callPackage ./tests/nix-ws-minimal.nix {
+            # Pass self' directly as it's the expected parameter name
             inherit self' pkgs;
             lib = pkgs.lib;
-            inputs = inputs';
-            config = {};
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
           };
 
           "vm-test-run-liveusb-ssh-vpn" = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
-            self = self;
-            inherit inputs pkgs;
+            inherit self inputs pkgs;
             # Add any specific minimal config for liveusb if needed
           };
         };
@@ -321,17 +303,14 @@
           inputs.nix-cloudflared.nixosModules.default
           inputs.sops-nix.nixosModules.sops  # Import sops-nix module
           inputs.agenix.nixosModules.default # Import agenix module
-          inputs.opnix.nixosModules.opnix    # Import opnix for 1Password integration
-        ];
+        ] ++ (if (inputs ? opnix && inputs.opnix ? nixosModules && inputs.opnix.nixosModules ? opnix)
+              then [ inputs.opnix.nixosModules.opnix ]
+              else []);
         nixpkgs.config.allowUnfree = true;
         nix.settings.experimental-features = [ "nix-command" "flakes" ];
         
-        # Common opnix configuration (optional defaults)
-        op.settings = {
-          enable = config.services.mcp-secrets.enable or false;
-          # Allow referencing 1Password secrets in Nix
-          # Will be activated only if mcp-secrets is enabled
-        };
+        # opnix configuration has been moved to a separate module
+        # that is conditionally imported only when opnix is available
       };
 
       # NixOS configurations

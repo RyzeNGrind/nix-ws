@@ -25,6 +25,7 @@ in
     (hive.homeModules.default or null)
     (devmods.homeModules.default or null)
     (flakelight.homeModules.default or null)
+    ./modules/1password-ssh.nix
     # ./shells.nix
     # ./editors.nix
     # ./dotfiles.nix

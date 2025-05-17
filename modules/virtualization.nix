@@ -102,12 +102,6 @@ in {
         "vfio_virqfd"
       ];
 
-      # Configure VFIO PCI passthrough
-      kernelParams = mkIf (cfg.vfioIds != []) (
-        [ "intel_iommu=on" "iommu=pt" ] ++
-        (map (id: "vfio-pci.ids=${id}") cfg.vfioIds)
-      );
-
       # Blacklist GPU drivers if using VFIO passthrough
       blacklistedKernelModules = mkIf (cfg.vfioIds != []) [ 
         "nvidia" 
@@ -120,11 +114,20 @@ in {
       "f /dev/shm/looking-glass 0660 ryzengrind kvm -"
     ];
 
-    # Configure huge pages for better VM performance
-    boot.kernelParams = mkIf cfg.enable [
-      "default_hugepagesz=1G"
-      "hugepagesz=1G"
-      "hugepages=16"
+    # Configure kernel parameters for VFIO and huge pages
+    boot.kernelParams = mkMerge [
+      # VFIO PCI passthrough parameters
+      (mkIf (cfg.vfioIds != []) (
+        [ "intel_iommu=on" "iommu=pt" ] ++
+        (map (id: "vfio-pci.ids=${id}") cfg.vfioIds)
+      ))
+
+      # Huge pages for better VM performance
+      (mkIf cfg.enable [
+        "default_hugepagesz=1G"
+        "hugepagesz=1G"
+        "hugepages=16"
+      ])
     ];
 
     # Create Windows 11 VM if enabled

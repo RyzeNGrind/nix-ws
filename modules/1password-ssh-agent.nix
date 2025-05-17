@@ -7,9 +7,26 @@ with lib;
 
 let
   cfg = config.services.onepassword-ssh-agent;
+
+  # Fetch npiperelay.exe using Nix
+  npiperelay-zip = pkgs.fetchurl {
+    url = "https://github.com/jstarks/npiperelay/releases/latest/download/npiperelay_windows_amd64.zip";
+    sha256 = "1xp59iv1wp92yhxzqrxcd7kdmcyfbn0lvmd3m43kbh0pzlgzd7kb"; # Verified hash
+  };
+
+  # Unpack npiperelay.exe and make it executable
+  npiperelay-unwrapped = pkgs.runCommand "npiperelay-unwrapped" {
+    nativeBuildInputs = [ pkgs.unzip ];
+    src = npiperelay-zip;
+  } ''
+    unzip $src -d $out
+    mv $out/npiperelay.exe $out/npiperelay
+    chmod +x $out/npiperelay
+  '';
+
 in {
-  options.services.onepassword-ssh-agent = {
-    enable = mkEnableOption "1Password SSH agent integration";
+options.services.onepassword-ssh-agent = {
+  enable = mkEnableOption "1Password SSH agent integration";
 
     socketPath = mkOption {
       type = types.str;
@@ -19,8 +36,8 @@ in {
 
     windowsPipeName = mkOption {
       type = types.str;
-      default = "//./pipe/openssh-ssh-agent";
-      description = "Windows named pipe for the SSH agent";
+      default = "//./pipe/com.1password.1password.ssh";
+      description = "Windows named pipe for the 1Password SSH agent";
     };
 
     autoStartAgent = mkOption {
@@ -42,7 +59,8 @@ in {
 
     # Install required dependencies
     home.packages = with pkgs; [
-      socat
+      socat # npiperelay is now handled via Nix derivation
+      # curl and unzip are not needed by the script anymore if npiperelay is pre-fetched
     ];
 
     # Create the bridge script
@@ -54,9 +72,9 @@ in {
 
         # Configuration
         SOCKET_PATH="${cfg.socketPath}"
-        PIPE_PATH="${cfg.windowsPipeName}"
+        PIPE_PATH="${cfg.windowsPipeName}" # This comes from the module options
         SOCKET_DIR="$(dirname "$SOCKET_PATH")"
-        NPIPERELAY_PATH="$HOME/bin/npiperelay.exe"
+        NPIPERELAY_PATH="${npiperelay-unwrapped}/npiperelay" # Use the Nix-provided npiperelay
         SOCAT_PATH="${pkgs.socat}/bin/socat"
 
         # Ensure socket directory exists
@@ -67,35 +85,65 @@ in {
           rm -f "$SOCKET_PATH"
         fi
 
-        # Check if npiperelay.exe exists, if not download it
-        if [ ! -f "$NPIPERELAY_PATH" ] || [ ! -x "$NPIPERELAY_PATH" ]; then
-          echo "Downloading npiperelay.exe..."
-          mkdir -p "$(dirname "$NPIPERELAY_PATH")"
-          
-          # Create temporary directory
-          TEMP_DIR=$(mktemp -d)
-          
-          # Download npiperelay zip file
-          curl -L -o "$TEMP_DIR/npiperelay.zip" "https://github.com/jstarks/npiperelay/releases/latest/download/npiperelay_windows_amd64.zip"
-          
-          # Extract the executable
-          unzip -o "$TEMP_DIR/npiperelay.zip" npiperelay.exe -d "$TEMP_DIR"
-          
-          # Move to final location
-          mv "$TEMP_DIR/npiperelay.exe" "$NPIPERELAY_PATH"
-          
-          # Cleanup
-          rm -rf "$TEMP_DIR"
-          
-          echo "npiperelay.exe installed to $NPIPERELAY_PATH"
+        # npiperelay.exe is now provided by Nix, no need to download
+
+        # Check for 1Password on Windows side
+        # Using a resilient method that doesn't require wslpath
+        if [ -e "/mnt/c/Program Files/1Password/app/8/1Password.exe" ]; then
+          echo "✓ 1Password found in Program Files"
+        elif find /mnt/c/Users/*/AppData/Local/1Password/app/8/1Password.exe -type f 2>/dev/null | grep -q .; then
+          echo "✓ 1Password found in AppData"
+        else
+          echo "Warning: Could not detect 1Password installation on Windows."
+          echo "Please ensure 1Password is installed and the SSH Agent feature is enabled in Settings > Developer."
         fi
 
-        # Check if the pipe exists on the Windows side
-        if ! ls -la /mnt/c/Windows/System32/OpenSSH/ssh-agent.exe >/dev/null 2>&1; then
-          echo "Warning: OpenSSH agent may not be installed on Windows."
-          echo "Please ensure OpenSSH Client is installed via Windows Settings > Apps > Optional features."
+        # Ensure socket directory has correct permissions (important for SSH security)
+        chmod 700 "$SOCKET_DIR"
+
+        echo "Starting 1Password SSH agent bridge..."
+        echo "Connecting to Windows pipe: $PIPE_PATH"
+        echo "Creating Unix socket: $SOCKET_PATH"
+
+        # Start the relay
+        # Check agent.toml file on Windows (crucial for "no identities" issue)
+        WIN_USERNAME=$(basename $(wslpath -w ~) | cut -d'\' -f2)
+        AGENT_TOML_PRIMARY="/mnt/c/Users/$WIN_USERNAME/AppData/Local/1Password/config/ssh/agent.toml"
+        AGENT_TOML_FALLBACK="/mnt/c/Users/$WIN_USERNAME/AppData/Local/1Password/app/8/op-ssh-sign/agent.toml"
+
+        if [ -f "$AGENT_TOML_PRIMARY" ]; then
+          echo "✓ agent.toml found at primary path: $AGENT_TOML_PRIMARY"
+          KEY_COUNT=$(grep -c '\[\[ssh-keys\]\]' "$AGENT_TOML_PRIMARY" || echo "0")
+          if [ "$KEY_COUNT" -gt 0 ]; then
+            echo "✓ $KEY_COUNT SSH key configurations found in agent.toml"
+          else
+            echo "! Warning: No [[ssh-keys]] configurations found in agent.toml"
+            echo "  This is likely causing the 'no identities' issue"
+            echo "  Add at least one entry like:"
+            echo "    [[ssh-keys]]"
+            echo "    vault = \"Private\""
+          fi
+        elif [ -f "$AGENT_TOML_FALLBACK" ]; then
+          echo "✓ agent.toml found at fallback path: $AGENT_TOML_FALLBACK"
+          KEY_COUNT=$(grep -c '\[\[ssh-keys\]\]' "$AGENT_TOML_FALLBACK" || echo "0")
+          if [ "$KEY_COUNT" -gt 0 ]; then
+            echo "✓ $KEY_COUNT SSH key configurations found in agent.toml"
+          else
+            echo "! Warning: No [[ssh-keys]] configurations found in agent.toml"
+          fi
+        else
+          echo "! Warning: agent.toml not found at expected locations"
+          echo "  This will cause the 'no identities' issue"
+          echo "  Create the file at: $AGENT_TOML_PRIMARY"
+          echo "  With content like:"
+          echo "    [[ssh-keys]]"
+          echo "    vault = \"Private\""
+          echo "  Then restart 1Password on Windows"
         fi
 
+        # Ensure socket directory has correct permissions
+        chmod 700 "$SOCKET_DIR"
+        
         echo "Starting 1Password SSH agent bridge..."
         echo "Connecting to Windows pipe: $PIPE_PATH"
         echo "Creating Unix socket: $SOCKET_PATH"
@@ -206,7 +254,11 @@ in {
         ExecStart = "${config.home.homeDirectory}/bin/setup-1password-ssh-bridge.sh";
         Restart = "always";
         RestartSec = 3;
-        Environment = "PATH=${config.home.profileDirectory}/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin";
+        # Use a more comprehensive PATH that includes user tools
+        Environment = "PATH=${config.home.profileDirectory}/bin:${config.home.homeDirectory}/bin:/nix/var/nix/profiles/default/bin:/run/current-system/sw/bin";
+        # Ensure WSL-specific environment variables are available
+        # This helps if the service needs to interact with Windows processes
+        PassEnvironment = ["WSL_DISTRO_NAME" "WSL_INTEROP"];
       };
 
       Install = {
@@ -217,13 +269,10 @@ in {
     # Configure SSH to use the socket
     programs.ssh = {
       enable = true;
-      matchBlocks = {
-        "*" = {
-          extraOptions = {
-            "IdentityAgent" = "${cfg.socketPath}";
-          };
-        };
-      };
+      extraConfig = ''
+        # 1Password SSH Agent Configuration
+        IdentityAgent ${cfg.socketPath}
+      '';
     };
   };
 }

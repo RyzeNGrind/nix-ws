@@ -366,7 +366,19 @@ in {
             cfg.user
             "/bin/bash"
             "-c"
-            ''export ANTHROPIC_API_KEY='${cfg.taskMaster.anthropicApiKey}'; export PERPLEXITY_API_KEY='${cfg.taskMaster.perplexityApiKey}'; export MODEL='${cfg.taskMaster.model}'; export PERPLEXITY_MODEL='${cfg.taskMaster.perplexityModel}'; export MAX_TOKENS=${toString cfg.taskMaster.maxTokens}; export TEMPERATURE=${toString cfg.taskMaster.temperature}; export DEFAULT_SUBTASKS=${toString cfg.taskMaster.defaultSubtasks}; export DEFAULT_PRIORITY='${cfg.taskMaster.defaultPriority}'; ${veniceRouterEnv} source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y --package=task-master-ai task-master-ai' ''
+            ''
+              export ANTHROPIC_API_KEY="${cfg.taskMaster.anthropicApiKey}"
+              export PERPLEXITY_API_KEY="${cfg.taskMaster.perplexityApiKey}"
+              export MODEL="${cfg.taskMaster.model}"
+              export PERPLEXITY_MODEL="${cfg.taskMaster.perplexityModel}"
+              export MAX_TOKENS=${toString cfg.taskMaster.maxTokens}
+              export TEMPERATURE=${toString cfg.taskMaster.temperature}
+              export DEFAULT_SUBTASKS=${toString cfg.taskMaster.defaultSubtasks}
+              export DEFAULT_PRIORITY="${cfg.taskMaster.defaultPriority}"
+              ${veniceRouterEnv}
+              source /etc/profile
+              nix-shell --option substitute true --option builders "" --option builders-use-substitutes false -p nodejs --run "NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y --package=task-master-ai task-master-ai"
+            ''
           ];
           allowedTools = [];
         };
@@ -383,7 +395,16 @@ in {
             cfg.user
             "/bin/bash"
             "-c"
-            ''export VENICE_API_KEY='${cfg.veniceRouterIntegration.veniceApiKey}'; export OPENROUTER_API_KEY='${cfg.veniceRouterIntegration.openRouterApiKey}'; export VENICE_API_ENDPOINT='${cfg.veniceRouterIntegration.veniceApiEndpoint}'; export OPENROUTER_API_ENDPOINT='${cfg.veniceRouterIntegration.openRouterApiEndpoint}'; source /etc/profile; nix-shell --option substitute true --option builders '' --option builders-use-substitutes false -p nodejs python3 --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y @smithery/cli@latest run @utensils/openai-compat-proxy --port 3001 --host 127.0.0.1 --target http://localhost:8765/v1' ''
+            ''
+              export VENICE_API_KEY='${cfg.veniceRouterIntegration.veniceApiKey}';
+              export OPENROUTER_API_KEY='${cfg.veniceRouterIntegration.openRouterApiKey}';
+              export VENICE_API_ENDPOINT='${cfg.veniceRouterIntegration.veniceApiEndpoint}';
+              export OPENROUTER_API_ENDPOINT='${cfg.veniceRouterIntegration.openRouterApiEndpoint}';
+              source /etc/profile;
+              nix-shell --option substitute true --option builders '''''' --option builders-use-substitutes false \
+                -p nodejs python3 \
+                --run 'NODE_TLS_REJECT_UNAUTHORIZED=0 npx -y @smithery/cli@latest run @utensils/openai-compat-proxy --port 3001 --host 127.0.0.1 --target http://localhost:8765/v1'
+            ''
           ];
           allowedTools = [
             "openai_chat_completions"

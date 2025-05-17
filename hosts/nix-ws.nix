@@ -16,6 +16,7 @@
     ../modules/ai-inference.nix
     ../modules/mcp-configuration.nix
     ../modules/mcp-secrets.nix
+    ../modules/wsl-integration.nix # Added WSL integration module
     # Consider if the following modules are essential for this specific host configuration
     # or if their concerns are better handled globally or via Home Manager.
     # ../modules/devshell.nix
@@ -299,6 +300,16 @@
     "vm.swappiness" = 10;
     "vm.vfs_cache_pressure" = 50;
     "kernel.sched_autogroup_enabled" = 1;
+  };
+  
+  # WSL Integration
+  wsl-integration = {
+    enable = true;
+    enableWindowsInterop = true;
+    enableWindowsHome = true;
+    windowsHome = "/mnt/c/Users/RyzeNGrind";  # Adjust to match your Windows username
+    enable1PasswordSSH = true;
+    pipeName = "//./pipe/com.1password.1password.ssh";
   };
 
   # Nix Configuration Overrides (if necessary)
