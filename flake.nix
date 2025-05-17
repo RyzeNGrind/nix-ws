@@ -144,8 +144,7 @@
         checks = {
           # Minimal test to verify basic structure
           dummy-core-check = pkgs.callPackage ./tests/nix-ws-core.nix {
-            self = self';
-            pkgs = pkgs;
+            inherit self' pkgs inputs'; # Pass self', pkgs, and inputs' from perSystem scope
             # Pass a minimal config directly for this test
             nix-fast-build.enable = true;
             environment.noTailscale = true;

@@ -1,4 +1,4 @@
-{ pkgs, self', ... }@args:
+{ pkgs, self', inputs, ... }@args: # Added 'inputs'
 let
   baseConfig = import ../hosts/nix-ws.nix;
 in (baseConfig args).config.system.build.vmTest.override {
