@@ -142,23 +142,31 @@
           # The liveusb package is defined below in the outputs section
         };
         checks = {
-          # Minimal test to verify basic structure
-          dummy-core-check = pkgs.callPackage ./tests/nix-ws-core.nix {
-            inherit self' pkgs;
-            lib = pkgs.lib; # Explicitly provide lib
-            inputs = inputs'; # Map perSystem's inputs' to inputs expected by the test
-            config = {}; # Provide an empty config object
-            # Pass a minimal config directly for this test
-            nix-fast-build.enable = true;
-            environment.noTailscale = true;
-          };
-          # Minimal liveusb test
-          dummy-liveusb-check = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
-            self = self; # self from flake outputs
-            inputs = inputs;
-            pkgs = pkgs; # pkgs from perSystem
-             # Add any specific minimal config for liveusb if needed
-          };
+          # Tests have been moved to individual scripts to optimize build times
+          # and allow for more granular testing.
+          #
+          # Run individual tests using ./scripts/run-vm-test.sh [test-name]
+          # Example: ./scripts/run-vm-test.sh nix-ws-core
+          #
+          # See available tests in the ./tests directory
+          #
+          # Original slow, comprehensive checks were:
+          # dummy-core-check = pkgs.callPackage ./tests/nix-ws-core.nix {
+          #   inherit self' pkgs;
+          #   lib = pkgs.lib; # Explicitly provide lib
+          #   inputs = inputs'; # Map perSystem's inputs' to inputs expected by the test
+          #   config = {}; # Provide an empty config object
+          #   # Pass a minimal config directly for this test
+          #   nix-fast-build.enable = true;
+          #   environment.noTailscale = true;
+          # };
+          # # Minimal liveusb test
+          # dummy-liveusb-check = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
+          #   self = self; # self from flake outputs
+          #   inputs = inputs;
+          #   pkgs = pkgs; # pkgs from perSystem
+          #    # Add any specific minimal config for liveusb if needed
+          # };
         };
       };
     } // {
