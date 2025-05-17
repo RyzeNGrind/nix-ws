@@ -27,7 +27,7 @@ let
   # Import nixpkgs
   nixpkgs = builtins.fetchTarball {
     url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
-    sha256 = "0000000000000000000000000000000000000000000000000000"; # This will fail and Nix will suggest the correct hash
+    sha256 = "0mmcni35fxs87fnhavfprspczgnnkxyizy8a4x57y98y76c4q4da"; # Hash from previous run
   };
   
   # Get flake inputs using builtins.getFlake
