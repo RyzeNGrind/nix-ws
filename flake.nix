@@ -142,31 +142,70 @@
           # The liveusb package is defined below in the outputs section
         };
         checks = {
-          # Tests have been moved to individual scripts to optimize build times
-          # and allow for more granular testing.
-          #
-          # Run individual tests using ./scripts/run-vm-test.sh [test-name]
-          # Example: ./scripts/run-vm-test.sh nix-ws-core
-          #
-          # See available tests in the ./tests directory
-          #
-          # Original slow, comprehensive checks were:
-          # dummy-core-check = pkgs.callPackage ./tests/nix-ws-core.nix {
-          #   inherit self' pkgs;
-          #   lib = pkgs.lib; # Explicitly provide lib
-          #   inputs = inputs'; # Map perSystem's inputs' to inputs expected by the test
-          #   config = {}; # Provide an empty config object
-          #   # Pass a minimal config directly for this test
-          #   nix-fast-build.enable = true;
-          #   environment.noTailscale = true;
-          # };
-          # # Minimal liveusb test
-          # dummy-liveusb-check = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
-          #   self = self; # self from flake outputs
-          #   inputs = inputs;
-          #   pkgs = pkgs; # pkgs from perSystem
-          #    # Add any specific minimal config for liveusb if needed
-          # };
+          # Individual VM tests for granular execution
+          # Use './scripts/run-vm-tests.sh [timeout_seconds] [test-name]' to run a specific test
+          # Example: ./scripts/run-vm-tests.sh 600 nix-ws-core
+
+          # Explicitly define each test as a separate check for individual execution
+          "vm-test-run-nix-ws-core" = pkgs.callPackage ./tests/nix-ws-core.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-nix-ws-network" = pkgs.callPackage ./tests/nix-ws-network.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-nix-ws-gui" = pkgs.callPackage ./tests/nix-ws-gui.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-nix-ws-e2e" = pkgs.callPackage ./tests/nix-ws-e2e.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-nix-ws-min" = pkgs.callPackage ./tests/nix-ws-min.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-nix-ws-integration" = pkgs.callPackage ./tests/nix-ws-integration.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
+
+          "vm-test-run-liveusb-ssh-vpn" = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
+            self = self;
+            inherit inputs pkgs;
+            # Add any specific minimal config for liveusb if needed
+          };
         };
       };
     } // {
