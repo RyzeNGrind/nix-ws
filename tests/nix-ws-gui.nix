@@ -21,7 +21,6 @@ pkgs.nixosTest {
     
     # Hardware acceleration mocked
     hardware.opengl.enable = true;
-    hardware.opengl.driSupport = true;
     
     system.stateVersion = "24.11";
   };
