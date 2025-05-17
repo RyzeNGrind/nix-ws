@@ -29,10 +29,11 @@ in
 
   imports = lib.filter (x: x != null) [ # Use lib.filter to remove nulls if inputs are missing
     ../modules/common-config.nix # Import common-config as a module
-    (if std != null && std ? homeModules && std.homeModules ? default then std.homeModules.default else null)
-    (if hive != null && hive ? homeModules && hive.homeModules ? default then hive.homeModules.default else null)
-    (if current_devmods != null && current_devmods ? homeModules && current_devmods.homeModules ? default then current_devmods.homeModules.default else null)
-    (if current_flakelight != null && current_flakelight ? homeModules && current_flakelight.homeModules ? default then current_flakelight.homeModules.default else null)
+    # Temporarily commenting out external flake module imports for debugging:
+    # (if std != null && std ? homeModules && std.homeModules ? default then std.homeModules.default else null)
+    # (if hive != null && hive ? homeModules && hive.homeModules ? default then hive.homeModules.default else null)
+    # (if current_devmods != null && current_devmods ? homeModules && current_devmods.homeModules ? default then current_devmods.homeModules.default else null)
+    # (if current_flakelight != null && current_flakelight ? homeModules && current_flakelight.homeModules ? default then current_flakelight.homeModules.default else null)
     ./modules/1password-ssh.nix
     # ./shells.nix
     # ./editors.nix
