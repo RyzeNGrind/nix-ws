@@ -200,6 +200,16 @@
             nix-fast-build.enable = true;
             environment.noTailscale = true;
           };
+          
+          # Ultra-minimal test for fast boot and basic functionality checks
+          "vm-test-run-nix-ws-minimal" = pkgs.callPackage ./tests/nix-ws-minimal.nix {
+            inherit self' pkgs;
+            lib = pkgs.lib;
+            inputs = inputs';
+            config = {};
+            nix-fast-build.enable = true;
+            environment.noTailscale = true;
+          };
 
           "vm-test-run-liveusb-ssh-vpn" = pkgs.callPackage ./tests/liveusb-ssh-vpn.nix {
             self = self;
