@@ -13,7 +13,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-24.05"; # Pin to release-24.05
       inputs.nixpkgs.follows = "nixpkgs";
     };
     sops-nix = {
