@@ -37,7 +37,7 @@ in {
   config = lib.mkIf cfg.enable {
     home.packages = [ pkgs._1password-gui-beta ];  # Updated to match 24.05 package name
 
-    systemd.user.services.1password-ssh-agent = lib.mkIf cfg.autoStartAgent {
+    systemd.user.services."1password-ssh-agent" = lib.mkIf (cfg.autoStartAgent && config.home.file != "") {
       Unit = {
         Description = "1Password SSH Agent";
         Requires = if isWsl then [] else ["_1password-gui-beta.service"];
