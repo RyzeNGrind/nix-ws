@@ -23,8 +23,17 @@
     # Add nixos-wsl to inputs
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL";
+    };
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-ld = {
+      url = "github:nix-community/nix-ld";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    # Hardware configuration
+    nixos-hardware.url = "github:nixos/nixos-hardware";
   };
   outputs = inputs @ {
     flake-parts,
@@ -144,6 +153,7 @@
           modules = [
             trustix.nixosModules.trustix
             opnix.nixosModules.default
+            inputs.sops-nix.nixosModules.sops
             ./hosts/nix-ws/configuration.nix
             {nix.settings.trusted-users = ["ryzengrind"];}
           ];
