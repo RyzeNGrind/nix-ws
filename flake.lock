@@ -2,10 +2,7 @@
   "nodes": {
     "buildNodeModules": {
       "inputs": {
-        "nixpkgs": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1700449523,
@@ -73,10 +70,7 @@
     },
     "flake-parts_2": {
       "inputs": {
-        "nixpkgs-lib": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs-lib": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1698882062,
@@ -145,10 +139,7 @@
     },
     "gitignore": {
       "inputs": {
-        "nixpkgs": [
-          "pre-commit-hooks",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["pre-commit-hooks", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1709087332,
@@ -166,10 +157,7 @@
     },
     "gitignore_2": {
       "inputs": {
-        "nixpkgs": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1694102001,
@@ -188,10 +176,7 @@
     "gomod2nix": {
       "inputs": {
         "flake-utils": "flake-utils_2",
-        "nixpkgs": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1694616124,
@@ -209,9 +194,7 @@
     },
     "home-manager": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": ["nixpkgs"]
       },
       "locked": {
         "lastModified": 1747688870,
@@ -230,10 +213,7 @@
     },
     "nix-github-actions": {
       "inputs": {
-        "nixpkgs": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1698974481,
@@ -251,9 +231,7 @@
     },
     "nix-ld": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": ["nixpkgs"]
       },
       "locked": {
         "lastModified": 1747646130,
@@ -369,9 +347,7 @@
     "opnix": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": ["nixpkgs"]
       },
       "locked": {
         "lastModified": 1746544287,
@@ -391,9 +367,7 @@
       "inputs": {
         "flake-compat": "flake-compat_2",
         "gitignore": "gitignore",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": ["nixpkgs"]
       },
       "locked": {
         "lastModified": 1747372754,
@@ -426,9 +400,7 @@
     },
     "sops-nix": {
       "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
+        "nixpkgs": ["nixpkgs"]
       },
       "locked": {
         "lastModified": 1747603214,
@@ -490,10 +462,7 @@
     },
     "treefmt-nix": {
       "inputs": {
-        "nixpkgs": [
-          "trustix",
-          "nixpkgs"
-        ]
+        "nixpkgs": ["trustix", "nixpkgs"]
       },
       "locked": {
         "lastModified": 1698438538,
@@ -517,9 +486,7 @@
         "gitignore": "gitignore_2",
         "gomod2nix": "gomod2nix",
         "nix-github-actions": "nix-github-actions",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
+        "nixpkgs": ["nixpkgs"],
         "systems": "systems_3",
         "treefmt-nix": "treefmt-nix"
       },
