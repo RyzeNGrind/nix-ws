@@ -206,7 +206,7 @@ lib.mkMerge [
         # --- Grouped Bare-metal Filesystems ---
         fileSystems = {
           "/" = {
-            device = "/dev/disk/by-uuid/5dc27f19-81cf-49db-a770-3415885b6cb7"";
+            device = "/dev/disk/by-uuid/5dc27f19-81cf-49db-a770-3415885b6cb7";
             fsType = "ext4";
           };
           "/boot" = {
