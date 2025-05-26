@@ -77,7 +77,7 @@ lib.mkMerge [
             vicmd_symbol = "[❮](bold blue)";
           };
         };
-      };
+      }
     };
     environment = {
       etc = etcFiles;
@@ -206,19 +206,18 @@ lib.mkMerge [
         # --- Grouped Bare-metal Filesystems ---
         fileSystems = {
           "/" = {
-            device = "/dev/disk/by-uuid/50b364ac-a2e9-4c8c-bc97-c7288f997323";
+            device = "/dev/disk/by-uuid/5dc27f19-81cf-49db-a770-3415885b6cb7"";
             fsType = "ext4";
           };
           "/boot" = {
-            device = "/dev/disk/by-uuid/74A6-C0C0";
+            device = "/dev/disk/by-uuid/17B6-1473";
             fsType = "vfat";
+            options = [ "fmask=0077" "dmask=0077" ];
           };
         };
         swapDevices = [
-          { device = "/dev/disk/by-uuid/34bf072f-7e3a-465b-ac57-ba1929007852"; }
+          { device = "/dev/disk/by-uuid/a869621e-d381-4777-adc8-7de13e6ae4b0"; }
         ];
-      };
-    };
 
         # --- Grouped Bare-metal Bootloader ---
         boot = {
