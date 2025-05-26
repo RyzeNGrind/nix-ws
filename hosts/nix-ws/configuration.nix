@@ -77,8 +77,8 @@ lib.mkMerge [
             vicmd_symbol = "[❮](bold blue)";
           };
         };
-      }
-    };
+      };
+    }
     environment = {
       etc = etcFiles;
       variables = displayVariable;
