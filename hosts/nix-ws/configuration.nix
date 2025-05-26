@@ -78,7 +78,7 @@ lib.mkMerge [
           };
         };
       };
-    }
+    };
     environment = {
       etc = etcFiles;
       variables = displayVariable;
