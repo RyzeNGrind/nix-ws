@@ -61,6 +61,7 @@
         inherit trustix trustix-nix;
       };
     };
+    isWSL = pkgs.stdenv.hostPlatform.isWSL or false;
   in
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
@@ -137,7 +138,11 @@
             attic-client
             _1password-cli
             _1password-gui-beta
-          ];
+          ]
+          ++ (lib.optionals isWSL [
+            wslu wsl-open
+          ]);
+        };
           # Include pre-commit check in the shell hook
           shellHook = ''
             ${config.pre-commit.installationScript or ""}
