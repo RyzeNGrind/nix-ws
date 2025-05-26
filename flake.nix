@@ -143,41 +143,27 @@
             wslu wsl-open
           ]);
         };
-          # Include pre-commit check in the shell hook
-          shellHook = ''
-            ${config.pre-commit.installationScript or ""}
-            ${pkgs.lib.readFile ./scripts/bin/devShellHook.sh}
-          '';
-        };
+        # Include pre-commit check in the shell hook
+        shellHook = ''
+          ${config.pre-commit.installationScript or ""}
+          ${pkgs.lib.readFile ./scripts/bin/devShellHook.sh}
+        '';
       };
-      flake = {
-        # Export the overlays
-        overlays = makeOverlays;
-        nixosConfigurations.nix-ws = nixpkgs.lib.nixosSystem {
-          system = "x86_64-linux";
-          modules = [
-            trustix.nixosModules.trustix
-            opnix.nixosModules.default
-            inputs.sops-nix.nixosModules.sops
-            ./hosts/nix-ws/configuration.nix
-            {nix.settings.trusted-users = ["ryzengrind"];}
-          ];
-          specialArgs = {
-            inherit inputs self;
-            pkgs = import nixpkgs {
-              system = "x86_64-linux";
-              overlays = [
-                makeOverlays.unstable
-                makeOverlays.trustixOverlay
-              ];
-              config.allowUnfree = true;
-            };
-          };
-        };
-        homeConfigurations.ryzengrind = home-manager.lib.homeManagerConfiguration {
-          extraSpecialArgs = {
-            inherit inputs self;
-          };
+    };
+    flake = {
+      # Export the overlays
+      overlays = makeOverlays;
+      nixosConfigurations.nix-ws = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          trustix.nixosModules.trustix
+          opnix.nixosModules.default
+          inputs.sops-nix.nixosModules.sops
+          ./hosts/nix-ws/configuration.nix
+          {nix.settings.trusted-users = ["ryzengrind"];}
+        ];
+        specialArgs = {
+          inherit inputs self;
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             overlays = [
@@ -186,11 +172,25 @@
             ];
             config.allowUnfree = true;
           };
-          modules = [
-            opnix.homeManagerModules.opnix
-            ./home-manager/ryzengrind/default.nix
-          ];
         };
       };
+      homeConfigurations.ryzengrind = home-manager.lib.homeManagerConfiguration {
+        extraSpecialArgs = {
+          inherit inputs self;
+        };
+        pkgs = import nixpkgs {
+          system = "x86_64-linux";
+          overlays = [
+            makeOverlays.unstable
+            makeOverlays.trustixOverlay
+          ];
+          config.allowUnfree = true;
+        };
+        modules = [
+          opnix.homeManagerModules.opnix
+          ./home-manager/ryzengrind/default.nix
+        ];
+      };
     };
+  };
 }
