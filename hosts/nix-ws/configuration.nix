@@ -213,11 +213,12 @@ lib.mkMerge [
             device = "/dev/disk/by-uuid/74A6-C0C0";
             fsType = "vfat";
           };
-          "/swap" = {
-            device = "/dev/disk/by-uuid/34bf072f-7e3a-465b-ac57-ba1929007852";
-            fsType = "swap";
-          };
         };
+        swapDevices = [
+          { device = "/dev/disk/by-uuid/34bf072f-7e3a-465b-ac57-ba1929007852"; }
+        ];
+      };
+    };
 
         # --- Grouped Bare-metal Bootloader ---
         boot = {
