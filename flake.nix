@@ -55,40 +55,15 @@
       "x86_64-darwin"
       "aarch64-darwin"
     ];
-    perSystem = {
-      config,
-      pkgs,
-      system,
-      inputs',
-      ...
-    }: let
-      # Define system-independent overlays here
-      makeOverlays = inputs'.self.overlays or {};
+    perSystem = { config, pkgs, system, lib, ... }: let
       isWSL = pkgs.stdenv.isLinux && (pkgs.stdenv.isWSL or false);
     in
     {
-      # Configure nixpkgs for each system
-      _module.args.pkgs = import nixpkgs {
-        inherit system;
-        config = {
-          allowUnfree = true;
-        };
-        overlays = [
-          makeOverlays.unstable
-          makeOverlays.trustixOverlay
-        ];
-      };
-
-      # Configure pre-commit hooks
       pre-commit = {
         check.enable = true;
         settings = {
-          # Remove the global exclude since it's not a valid option at this level
-          # Instead configure excludes per hook
-
           hooks = {
             alejandra.enable = true;
-            # Add exclude pattern to deadnix hook
             deadnix = {
               enable = true;
               excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
@@ -98,7 +73,6 @@
           };
         };
       };
-
       devShells.default = pkgs.mkShell {
         name = "nix-config-dev-shell";
         nativeBuildInputs = with pkgs; [
@@ -109,7 +83,7 @@
           git
           gh
           fish
-          pre-commit # Use the pre-commit package directly
+          pre-commit
           jq
           nil
           nix-output-monitor
@@ -128,16 +102,16 @@
           _1password-gui-beta
         ]
         ++ (lib.optionals isWSL [
-          wslu wsl-open
+          wslu
+          wsl-open
         ]);
         shellHook = ''
-          ${config.pre-commit.installationScript or ""}
-          ${pkgs.lib.readFile ./scripts/bin/devShellHook.sh}
+          ${config.pre-commit.installationScript}
+          ${lib.readFile ./scripts/bin/devShellHook.sh}
         '';
       };
     };
     flake = {
-      # Export the overlays
       overlays = {
         unstable = _: prev: {
           unstable = import nixpkgs-unstable {
@@ -145,7 +119,6 @@
             config.allowUnfree = true;
           };
         };
-
         trustixOverlay = _: prev: let
           inherit (trustix.packages.${prev.system}) trustix trustix-nix;
         in {
@@ -159,15 +132,20 @@
           opnix.nixosModules.default
           inputs.sops-nix.nixosModules.sops
           ./hosts/nix-ws/configuration.nix
-          {nix.settings.trusted-users = ["ryzengrind"];}
+          {
+            nix.settings = {
+              trusted-users = ["ryzengrind"];
+              trusted-substituters = [ "https://cache.nixos.org/" ];
+            };
+          }
         ];
         specialArgs = {
           inherit inputs self;
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             overlays = [
-              overlays.unstable
-              overlays.trustixOverlay
+              self.overlays.unstable
+              self.overlays.trustixOverlay
             ];
             config.allowUnfree = true;
           };
@@ -180,14 +158,20 @@
         pkgs = import nixpkgs {
           system = "x86_64-linux";
           overlays = [
-            overlays.unstable
-            overlays.trustixOverlay
+            self.overlays.unstable
+            self.overlays.trustixOverlay
           ];
           config.allowUnfree = true;
         };
         modules = [
           opnix.homeManagerModules.opnix
           ./home-manager/ryzengrind/default.nix
+          {
+            nix.settings = {
+              trusted-users = ["ryzengrind"];
+              trusted-substituters = [ "https://cache.nixos.org/" ];
+            };
+          }
         ];
       };
     };
