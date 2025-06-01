@@ -45,102 +45,123 @@
     opnix,
     self,
     ...
-  }: flake-parts.lib.mkFlake {inherit inputs;} {
-    imports = [
-      pre-commit-hooks.flakeModule
-    ];
-    systems = [
-      "x86_64-linux"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "aarch64-darwin"
-    ];
-    perSystem = { config, pkgs, system, lib, ... }: let
-      isWSL = pkgs.stdenv.isLinux && (pkgs.stdenv.isWSL or false);
-    in
-    {
-      pre-commit = {
-        check.enable = true;
-        settings = {
-          hooks = {
-            alejandra.enable = true;
-            deadnix = {
-              enable = true;
-              excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
+  }:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      imports = [
+        pre-commit-hooks.flakeModule
+      ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "aarch64-darwin"
+      ];
+      perSystem = {
+        config,
+        pkgs,
+        system,
+        lib,
+        ...
+      }: let
+        isWSL = pkgs.stdenv.isLinux && (pkgs.stdenv.isWSL or false);
+      in {
+        pre-commit = {
+          check.enable = true;
+          settings = {
+            hooks = {
+              alejandra.enable = true;
+              deadnix = {
+                enable = true;
+                excludes = ["^hosts/nix-ws/hardware-configuration\\.nix$"];
+              };
+              statix.enable = true;
+              prettier.enable = true;
             };
-            statix.enable = true;
-            prettier.enable = true;
           };
         };
+        devShells.default = pkgs.mkShell {
+          name = "nix-config-dev-shell";
+          nativeBuildInputs = with pkgs;
+            [
+              alejandra
+              deadnix
+              statix
+              nodePackages.prettier
+              git
+              gh
+              fish
+              pre-commit
+              jq
+              nil
+              nix-output-monitor
+              home-manager.packages.${pkgs.hostPlatform.system}.default
+              starship
+              bashInteractive
+              bash-completion
+              bash-preexec
+              fzf
+              zoxide
+              direnv
+              cachix
+              attic-server
+              attic-client
+              _1password-cli
+              _1password-gui-beta
+            ]
+            ++ (lib.optionals isWSL [
+              wslu
+              wsl-open
+            ]);
+          shellHook = ''
+            ${config.pre-commit.installationScript}
+            ${lib.readFile ./scripts/bin/devShellHook.sh}
+          '';
+        };
       };
-      devShells.default = pkgs.mkShell {
-        name = "nix-config-dev-shell";
-        nativeBuildInputs = with pkgs; [
-          alejandra
-          deadnix
-          statix
-          nodePackages.prettier
-          git
-          gh
-          fish
-          pre-commit
-          jq
-          nil
-          nix-output-monitor
-          home-manager.packages.${pkgs.hostPlatform.system}.default
-          starship
-          bashInteractive
-          bash-completion
-          bash-preexec
-          fzf
-          zoxide
-          direnv
-          cachix
-          attic-server
-          attic-client
-          _1password-cli
-          _1password-gui-beta
-        ]
-        ++ (lib.optionals isWSL [
-          wslu
-          wsl-open
-        ]);
-        shellHook = ''
-          ${config.pre-commit.installationScript}
-          ${lib.readFile ./scripts/bin/devShellHook.sh}
-        '';
-      };
-    };
-    flake = {
-      overlays = {
-        unstable = _: prev: {
-          unstable = import nixpkgs-unstable {
-            inherit (prev) system;
-            config.allowUnfree = true;
+      flake = {
+        overlays = {
+          unstable = _: prev: {
+            unstable = import nixpkgs-unstable {
+              inherit (prev) system;
+              config.allowUnfree = true;
+            };
+          };
+          trustixOverlay = _: prev: let
+            inherit (trustix.packages.${prev.system}) trustix trustix-nix;
+          in {
+            inherit trustix trustix-nix;
           };
         };
-        trustixOverlay = _: prev: let
-          inherit (trustix.packages.${prev.system}) trustix trustix-nix;
-        in {
-          inherit trustix trustix-nix;
-        };
-      };
-      nixosConfigurations.nix-ws = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        modules = [
-          trustix.nixosModules.trustix
-          opnix.nixosModules.default
-          inputs.sops-nix.nixosModules.sops
-          ./hosts/nix-ws/configuration.nix
-          {
-            nix.settings = {
-              trusted-users = ["ryzengrind"];
-              trusted-substituters = [ "https://cache.nixos.org/" ];
+        nixosConfigurations.nix-ws = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            trustix.nixosModules.trustix
+            opnix.nixosModules.default
+            inputs.sops-nix.nixosModules.sops
+            ./hosts/nix-ws/configuration.nix
+            {
+              nix.settings = {
+                trusted-users = ["ryzengrind"];
+                trusted-substituters = ["https://cache.nixos.org/"];
+              };
+            }
+          ];
+          specialArgs = {
+            inherit inputs self;
+            pkgs = import nixpkgs {
+              system = "x86_64-linux";
+              overlays = [
+                self.overlays.unstable
+                self.overlays.trustixOverlay
+              ];
+              config.allowUnfree = true;
             };
-          }
-        ];
-        specialArgs = {
-          inherit inputs self;
+          };
+        };
+        homeConfigurations.ryzengrind = home-manager.lib.homeManagerConfiguration {
+          extraSpecialArgs = {
+            inherit inputs self;
+          };
           pkgs = import nixpkgs {
             system = "x86_64-linux";
             overlays = [
@@ -149,31 +170,17 @@
             ];
             config.allowUnfree = true;
           };
-        };
-      };
-      homeConfigurations.ryzengrind = home-manager.lib.homeManagerConfiguration {
-        extraSpecialArgs = {
-          inherit inputs self;
-        };
-        pkgs = import nixpkgs {
-          system = "x86_64-linux";
-          overlays = [
-            self.overlays.unstable
-            self.overlays.trustixOverlay
+          modules = [
+            opnix.homeManagerModules.opnix
+            ./home-manager/ryzengrind/default.nix
+            {
+              nix.settings = {
+                trusted-users = ["ryzengrind"];
+                trusted-substituters = ["https://cache.nixos.org/"];
+              };
+            }
           ];
-          config.allowUnfree = true;
         };
-        modules = [
-          opnix.homeManagerModules.opnix
-          ./home-manager/ryzengrind/default.nix
-          {
-            nix.settings = {
-              trusted-users = ["ryzengrind"];
-              trusted-substituters = [ "https://cache.nixos.org/" ];
-            };
-          }
-        ];
       };
     };
-  };
 }
