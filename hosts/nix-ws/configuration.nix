@@ -37,6 +37,7 @@ in
           grub = {
             enable = lib.mkDefault false; # Explicitly disable GRUB by default
             device = lib.mkDefault null; # Satisfies the check when grub is disabled
+            useOSProber = true;
           };
         };
         # Add other common boot settings here if needed

@@ -56,6 +56,13 @@
         "x86_64-darwin"
         "aarch64-darwin"
       ];
+      _module.args = {
+        # Remove global pkgs import that tries to inherit system
+        # pkgs = import nixpkgs {
+        #   inherit system;
+        #   config.allowUnfree = true;
+        # };
+      };
       perSystem = {
         config,
         pkgs,
@@ -117,6 +124,9 @@
             ${lib.readFile ./scripts/bin/devShellHook.sh}
           '';
         };
+        checks.${system}.helloCheck = pkgs.runCommand "helloCheck" {} ''
+          ${pkgs.hello}/bin/hello > $out
+        '';
       };
       flake = {
         overlays = {
