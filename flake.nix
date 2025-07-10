@@ -114,7 +114,24 @@
             ]);
           shellHook = ''
             ${config.pre-commit.installationScript}
-            ${lib.readFile ./scripts/bin/devShellHook.sh}
+            # Agentic aliases for fast Nix workflows
+            if [ -n "$BASH_VERSION" ]; then
+              alias nfc='nix run github:Mic92/nix-fast-build -- --flake ".#checks.$(nix eval --impure --raw --expr "builtins.currentSystem")"'
+              alias nfco='nix flake check'
+              alias fastcheck='nix run github:Mic92/nix-fast-build -- --flake ".#checks.$(nix eval --impure --raw --expr "builtins.currentSystem")"'
+              alias fastdev='nix run github:Mic92/nix-fast-build -- --flake ".#devShells.$(nix eval --impure --raw --expr "builtins.currentSystem").default"'
+            fi
+            if [ -n "$FISH_VERSION" ]; then
+              alias nfc "nix run github:Mic92/nix-fast-build -- --flake .#checks.(nix eval --impure --raw --expr 'builtins.currentSystem')"
+              alias nfco "nix flake check"
+              alias fastcheck "nix run github:Mic92/nix-fast-build -- --flake .#checks.(nix eval --impure --raw --expr 'builtins.currentSystem')"
+              alias fastdev "nix run github:Mic92/nix-fast-build -- --flake .#devShells.(nix eval --impure --raw --expr 'builtins.currentSystem').default"
+            end
+            echo "[nix-ws] Aliases: nfc (fast check), nfco (flake check), fastcheck, fastdev loaded."
+            # Source any additional devShellHook if needed
+            if [ -f "./scripts/bin/devShellHook.sh" ]; then
+              . ./scripts/bin/devShellHook.sh
+            fi
           '';
         };
       };
